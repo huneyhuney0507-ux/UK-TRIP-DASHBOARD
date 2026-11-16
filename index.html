@@ -214,7 +214,7 @@
                     </div>
                 </div>
 
-                <div id="scheduleTimeline" class="space-y-3 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-uksidewalk/50 flex-1">
+                <div id="scheduleTimeline" class="space-y-3 relative before:absolute before:inset-0 before:left-[88.6px] sm:before:left-[96.6px] before:w-0.5 before:bg-uksidewalk/50 flex-1">
                     <!-- Timeline Items injected dynamically -->
                 </div>
             </div>
@@ -238,10 +238,16 @@
                         </div>
                     </div>
 
-                    <!-- Common: Time -->
-                    <div class="w-full overflow-hidden">
-                        <label class="block text-[11px] text-slate-500 mb-1 font-medium">時間</label>
-                        <input type="time" id="schedTime" required value="12:00" class="w-full min-w-0 box-border appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:border-uknavy font-semibold">
+                    <!-- Common: Start & End Time -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-1 font-medium">開始時間</label>
+                            <input type="time" id="schedTime" required value="12:00" class="w-full min-w-0 box-border appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:border-uknavy font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-1 font-medium">終了時間</label>
+                            <input type="time" id="schedEndTime" value="13:00" class="w-full min-w-0 box-border appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:border-uknavy font-semibold">
+                        </div>
                     </div>
 
                     <!-- Dynamic: Sightseeing Form -->
@@ -1076,10 +1082,12 @@
             const dateId = window.appState.selectedDate === 'ALL' ? TRIP_DATES[0].id : window.appState.selectedDate;
             const cat = window.appState.formCategory;
             const time = document.getElementById('schedTime').value || '12:00';
+            const endTime = document.getElementById('schedEndTime').value || '';
             let newItem = {
                 id: 'sched_' + Date.now(),
                 category: cat,
                 time: time,
+                endTime: endTime,
                 cost: 0
             };
 
@@ -1126,6 +1134,7 @@
 
             document.getElementById('addScheduleForm').reset();
             document.getElementById('schedTime').value = time;
+            document.getElementById('schedEndTime').value = endTime;
             window.setFormCategory(cat);
             window.setDiningType('Breakfast');
             window.updateSchedCostPreview();
@@ -1313,14 +1322,35 @@
                 ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dayPrefixLabel)}</span>`
                 : '';
 
+            let endTimeStr = item.endTime || '';
+            if (!endTimeStr) {
+                try {
+                    const [hh, mm] = item.time.split(':').map(Number);
+                    const totalM = hh * 60 + mm + 45;
+                    const eh = Math.floor(totalM / 60) % 24;
+                    const em = totalM % 60;
+                    endTimeStr = String(eh).padStart(2, '0') + ':' + String(em).padStart(2, '0');
+                } catch(e) {
+                    endTimeStr = '--:--';
+                }
+            }
+
             return `
-                <div class="relative pl-7 group animate-fade-in">
-                    <div class="absolute left-1 top-2.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow"></div>
-                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" class="bg-white hover:bg-amber-50/40 active:bg-amber-50/80 cursor-pointer transition rounded-xl p-3 border border-uksidewalk/60 shadow-sm relative">
+                <div class="relative pl-[112px] sm:pl-[122px] group animate-fade-in py-1">
+                    <!-- Left Time Column with slightly larger sans-serif Gothic font -->
+                    <div class="absolute left-0 top-2.5 w-20 sm:w-22 text-right pr-3 select-none font-sans font-semibold">
+                        <div class="font-bold text-sm sm:text-base text-ukcinder leading-tight">${window.escapeHtml(item.time)}</div>
+                        <div class="text-xs text-slate-400 font-medium leading-tight mt-0.5">${window.escapeHtml(endTimeStr)}</div>
+                    </div>
+
+                    <!-- Timeline node dot precisely centered on the vertical line -->
+                    <div class="absolute left-[83px] sm:left-[91px] top-3.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow z-10"></div>
+
+                    <!-- Right Schedule Box -->
+                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" class="bg-white hover:bg-amber-50/40 active:bg-amber-50/80 cursor-pointer transition rounded-xl p-3 border border-uksidewalk/60 shadow-sm relative ml-2">
                         <div class="flex flex-wrap justify-between items-start gap-1 mb-1">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 ${dayTagHtml}
-                                <span class="font-mono font-bold text-xs text-white bg-ukgold px-2 py-0.5 rounded-md">${window.escapeHtml(item.time)}</span>
                                 ${badgeHtml}
                             </div>
                             <div class="flex items-center gap-1" onclick="event.stopPropagation()">
@@ -1389,9 +1419,15 @@
                 titleContainer.innerHTML = `<h3 class="font-bold text-ukcinder text-base">予定の編集</h3>`;
                 
                 let editFieldsHtml = `
-                    <div>
-                        <label class="block font-semibold text-ukcinder mb-1">時間</label>
-                        <input type="time" id="editSchedTime" value="${item.time || '12:00'}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">開始時間</label>
+                            <input type="time" id="editSchedTime" value="${item.time || '12:00'}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">終了時間</label>
+                            <input type="time" id="editSchedEndTime" value="${item.endTime || ''}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                        </div>
                     </div>
                 `;
 
@@ -1577,6 +1613,8 @@
 
             const newTime = document.getElementById('editSchedTime').value;
             if (newTime) item.time = newTime;
+            const newEndTime = document.getElementById('editSchedEndTime').value;
+            if (newEndTime !== undefined) item.endTime = newEndTime;
 
             if (item.category === 'sightseeing') {
                 item.spot = document.getElementById('editSpot').value.trim() || item.spot;
