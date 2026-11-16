@@ -1276,10 +1276,10 @@
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-uknavy';
                 badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 Sightseeing</span>`;
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.spot)}</h4>`;
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-sm sm:text-base leading-snug mb-2" style="${textStyle}">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
-                    ${item.action ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.action)}</p>` : ''}
-                    ${item.memo ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : ''}
+                    ${item.action ? `<p class="text-[11px] ${textColorClass} mt-1.5 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.action)}</p>` : ''}
+                    ${item.memo ? `<p class="text-[11px] ${textColorClass} mt-1.5 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : ''}
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
@@ -1287,8 +1287,8 @@
                 const diningMainBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">🍽️ Dining</span>`;
                 const diningSubBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(dType)} shadow-sm">${window.escapeHtml(dType)}</span>`;
                 badgeHtml = diningMainBadge + ' ' + diningSubBadge;
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.name)}</h4>`;
-                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-sm sm:text-base leading-snug mb-2" style="${textStyle}">${window.escapeHtml(item.name)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-1.5 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
             } else if (item.category === 'transport') {
                 dotColor = 'bg-slate-700';
                 const modeEmojis = {
@@ -1308,18 +1308,18 @@
                 }
                 badgeHtml = modeBadge;
                 titleHtml = `
-                    <h4 class="font-bold ${textColorClass} text-xs sm:text-sm flex items-center gap-1.5 flex-wrap leading-snug" style="${textStyle}">
+                    <h4 class="font-bold ${textColorClass} text-sm sm:text-base flex items-center gap-1.5 flex-wrap leading-snug mb-2" style="${textStyle}">
                         <span>${window.escapeHtml(item.from)}</span>
                         <i class="fa-solid fa-arrow-right text-[10px] opacity-70"></i>
                         <span>${window.escapeHtml(item.to)}</span>
                     </h4>
                 `;
-                detailsHtml = item.duration ? `<p class="text-[11px] ${textColorClass} mt-2" style="${textStyle}"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
+                detailsHtml = item.duration ? `<p class="text-[11px] ${textColorClass} mt-3" style="${textStyle}"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
             } else {
                 dotColor = 'bg-uksidewalk';
                 badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 Others</span>`;
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
-                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-sm sm:text-base leading-snug mb-2" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-1.5 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
             }
 
             const dayTagHtml = dayPrefixLabel
@@ -1357,8 +1357,8 @@
                     <div class="absolute left-[51px] sm:left-[57px] top-4 w-3 h-3 rounded-full ${dotClass} border-2 border-white shadow z-10" style="${dotStyle}"></div>
 
                     <!-- Right Schedule Box -->
-                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" style="${cardBgStyle}" class="bg-white hover:brightness-95 active:brightness-90 cursor-pointer transition rounded-xl p-3 border border-uksidewalk/60 shadow-sm relative ml-2">
-                        <div class="flex flex-wrap justify-between items-start gap-1 mb-1">
+                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" style="${cardBgStyle}" class="bg-white hover:brightness-95 active:brightness-90 cursor-pointer transition rounded-xl p-3.5 border border-uksidewalk/60 shadow-sm relative ml-2">
+                        <div class="flex flex-wrap justify-between items-start gap-1 mb-2">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 ${dayTagHtml}
                                 ${badgeHtml}
@@ -1371,7 +1371,7 @@
                         </div>
                         ${titleHtml}
                         ${detailsHtml}
-                        <div class="text-[9px] opacity-60 font-semibold text-right mt-1.5" style="${textStyle}">タップで詳細・カラー変更 ➔</div>
+                        <div class="text-[9px] opacity-60 font-semibold text-right mt-2" style="${textStyle}">タップで詳細・カラー変更 ➔</div>
                     </div>
                 </div>
             `;
