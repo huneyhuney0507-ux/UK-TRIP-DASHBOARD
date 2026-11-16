@@ -145,7 +145,7 @@
                             <i class="fa-solid fa-wifi-slash"></i> オフライン
                         </span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-amber-100/80">2026.12.01 - 12.08 (8 Days in UK)</p>
+                    <p class="text-[11px] sm:text-xs text-amber-100/80">2026.12.01 - 12.07 (7 Days in UK)</p>
                 </div>
 
                 <!-- Currency Rate Bar (Compact Mobile Style) -->
@@ -206,7 +206,9 @@
                         <i class="fa-solid fa-clock text-uknavy"></i> タイムライン
                     </h3>
                     <div class="flex items-center gap-2">
-                        <span id="dailyEstimatedSum" class="text-[11px] sm:text-xs font-bold text-uknavy bg-amber-50 border border-ukgold/40 px-2 py-0.5 rounded-lg">予定計: £0.00</span>
+                        <button onclick="openBackupModal()" title="データのバックアップ・復元" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-uknavy px-2.5 py-1 rounded-xl font-semibold flex items-center gap-1 transition">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> データ管理
+                        </button>
                     </div>
                 </div>
 
@@ -227,10 +229,10 @@
                     <div>
                         <label class="block text-[11px] text-slate-500 mb-1 font-medium">カテゴリー</label>
                         <div class="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
-                            <button type="button" onclick="setFormCategory('sightseeing')" id="catBtn_sightseeing" class="py-2 rounded-lg bg-white text-uknavy shadow transition text-center">🏛 観光</button>
-                            <button type="button" onclick="setFormCategory('dining')" id="catBtn_dining" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">☕️ 食事</button>
-                            <button type="button" onclick="setFormCategory('transport')" id="catBtn_transport" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">🚌 移動</button>
-                            <button type="button" onclick="setFormCategory('other')" id="catBtn_other" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">💡 その他</button>
+                            <button type="button" onclick="setFormCategory('sightseeing')" id="catBtn_sightseeing" class="py-2 rounded-lg bg-white text-uknavy shadow transition text-center">🏛 Sightseeing</button>
+                            <button type="button" onclick="setFormCategory('dining')" id="catBtn_dining" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">🍽️ Dining</button>
+                            <button type="button" onclick="setFormCategory('transport')" id="catBtn_transport" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">🚌 Transit</button>
+                            <button type="button" onclick="setFormCategory('other')" id="catBtn_other" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">💡 Others</button>
                         </div>
                     </div>
 
@@ -265,11 +267,11 @@
                             <div>
                                 <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">種別</label>
                                 <select id="dineType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:border-uknavy font-semibold">
-                                    <option value="朝食 🍳">朝食 🍳</option>
-                                    <option value="ランチ 🥪">ランチ 🥪</option>
-                                    <option value="ディナー 🍷">ディナー 🍷</option>
-                                    <option value="カフェ/ティー ☕️">カフェ ☕️</option>
-                                    <option value="パブ 🍺">パブ 🍺</option>
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Lunch">Lunch</option>
+                                    <option value="Dinner">Dinner</option>
+                                    <option value="Cafe">Cafe</option>
+                                    <option value="Pub">Pub</option>
                                 </select>
                             </div>
                             <div>
@@ -601,8 +603,7 @@
             { id: '2026-12-04', short: '12/04', day: 'Fri', jp: '12月4日 (金)', tip: 'バラ・マーケット（Borough Market）は午前中〜ランチ前が比較的空いていて食べ歩きに最適です。' },
             { id: '2026-12-05', short: '12/05', day: 'Sat', jp: '12月5日 (土)', tip: '週末はノッティングヒル（ポートベロー・マーケット）やコヴェント・ガーデンの活気あるマーケット散策がおすすめ！' },
             { id: '2026-12-06', short: '12/06', day: 'Sun', jp: '12月6日 (日)', tip: '日曜日はパブで伝統料理「サンデーロースト」を楽しむ絶好の機会。人気店は事前予約が安心です。' },
-            { id: '2026-12-07', short: '12/07', day: 'Mon', jp: '12月7日 (月)', tip: '12月のロンドンは16時頃から暗くなり始めます。オックスフォード・ストリートやリージェント・ストリートのクリスマスイルミネーションが必見です！' },
-            { id: '2026-12-08', short: '12/08', day: 'Tue', jp: '12月8日 (火)', tip: '帰国日はヒースロー空港へ余裕を持って出発しましょう（出発3時間前到着が目安）。' }
+            { id: '2026-12-07', short: '12/07', day: 'Mon', jp: '12月7日 (月)', tip: '12月のロンドンは16時頃から暗くなり始めます。オックスフォード・ストリートやリージェント・ストリートのクリスマスイルミネーションが必見です！' }
         ];
 
         const DEFAULT_STATE = {
@@ -617,8 +618,7 @@
                 '2026-12-04': 120,
                 '2026-12-05': 150,
                 '2026-12-06': 100,
-                '2026-12-07': 150,
-                '2026-12-08': 80
+                '2026-12-07': 150
             },
             dailySubBudgets: {
                 '2026-12-01': { '食事': 50, 'ショッピング': 30, '交通費': 25, 'その他': 15 },
@@ -627,8 +627,7 @@
                 '2026-12-04': { '食事': 50, 'ショッピング': 30, '交通費': 25, 'その他': 15 },
                 '2026-12-05': { '食事': 60, 'ショッピング': 40, '交通費': 30, 'その他': 20 },
                 '2026-12-06': { '食事': 40, 'ショッピング': 30, '交通費': 20, 'その他': 10 },
-                '2026-12-07': { '食事': 60, 'ショッピング': 40, '交通費': 30, 'その他': 20 },
-                '2026-12-08': { '食事': 30, 'ショッピング': 20, '交通費': 20, 'その他': 10 }
+                '2026-12-07': { '食事': 60, 'ショッピング': 40, '交通費': 30, 'その他': 20 }
             },
             schedules: {
                 '2026-12-01': [
@@ -970,7 +969,7 @@
             const currentObj = TRIP_DATES.find(d => d.id === window.appState.selectedDate) || TRIP_DATES[0];
             
             document.getElementById('currentSelectedDateLabel').textContent = isAllSelected
-                ? '全体 (12/01 - 12/08)'
+                ? '全体 (12/01 - 12/07)'
                 : `${currentObj.short} (${currentObj.day})`;
 
             const totalSchedCount = TRIP_DATES.reduce((sum, d) => sum + (window.appState.schedules[d.id] || []).length, 0);
@@ -984,7 +983,7 @@
                         }">
                     <span class="text-[9px] font-bold uppercase ${isAllSelected ? 'text-ukgold' : 'text-amber-700'}">ALL</span>
                     <span class="text-xs font-extrabold leading-tight mt-0.5">全体</span>
-                    <span class="text-[9px] ${isAllSelected ? 'text-slate-300' : 'text-slate-500'}">8日間</span>
+                    <span class="text-[9px] ${isAllSelected ? 'text-slate-300' : 'text-slate-500'}">7日間</span>
                     ${totalSchedCount > 0 ? `<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${isAllSelected ? 'bg-ukgold' : 'bg-ukred'}"></span>` : ''}
                 </button>
             `;
@@ -1178,6 +1177,18 @@
             return map[line] || 'bg-ukblue text-white';
         };
 
+        window.getDineTypeBadgeColor = function(dineType) {
+            const map = {
+                'Breakfast': 'bg-[#d97706] text-white', // Warm Amber
+                'Lunch': 'bg-[#059669] text-white',     // Emerald Green
+                'Dinner': 'bg-[#1e293b] text-white',    // Navy
+                'Cafe': 'bg-[#e06d60] text-white',      // Salmon Pink
+                'Pub': 'bg-[#78350f] text-white'        // Brown
+            };
+            const key = (dineType || '').trim();
+            return map[key] || 'bg-amber-600 text-white';
+        };
+
         window.renderItinerary = function() {
             const isAll = window.appState.selectedDate === 'ALL';
             const timeline = document.getElementById('scheduleTimeline');
@@ -1192,8 +1203,6 @@
                 });
 
                 document.getElementById('scheduleCountBadge').textContent = `${allItems.length} 件`;
-                const estTotal = allItems.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
-                document.getElementById('dailyEstimatedSum').textContent = `8日間予定予算計: ${window.formatGbp(estTotal)} (${window.formatJpy(estTotal)})`;
 
                 if (allItems.length === 0) {
                     timeline.innerHTML = `
@@ -1214,9 +1223,6 @@
             const dateId = window.appState.selectedDate;
             const items = [...(window.appState.schedules[dateId] || [])].sort((a, b) => a.time.localeCompare(b.time));
             document.getElementById('scheduleCountBadge').textContent = `${items.length} 件`;
-
-            const estTotal = items.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
-            document.getElementById('dailyEstimatedSum').textContent = `予定予算計: ${window.formatGbp(estTotal)} (${window.formatJpy(estTotal)})`;
 
             if (items.length === 0) {
                 timeline.innerHTML = `
@@ -1241,7 +1247,7 @@
 
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-uknavy';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 観光</span>`;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 Sightseeing</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
                     ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.action)}</p>` : ''}
@@ -1249,7 +1255,10 @@
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">${window.escapeHtml(item.dineType || '☕️ 食事')}</span>`;
+                badgeHtml = `
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">🍽️ Dining</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${window.getDineTypeBadgeColor(item.dineType)}">${window.escapeHtml(item.dineType || 'Breakfast')}</span>
+                `;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.name)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             } else if (item.category === 'transport') {
@@ -1271,12 +1280,11 @@
                 detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
             } else {
                 dotColor = 'bg-uksidewalk';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 その他</span>`;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 Others</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.title)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             }
 
-            const hasCost = Number(item.cost) > 0;
             const dayTagHtml = dayPrefixLabel
                 ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dayPrefixLabel)}</span>`
                 : '';
@@ -1292,14 +1300,6 @@
                                 ${badgeHtml}
                             </div>
                             <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-                                ${hasCost ? `
-                                    <span class="text-[11px] font-bold text-ukcinder bg-amber-50 border border-ukgold/40 px-1.5 py-0.5 rounded">
-                                        ${window.formatGbp(item.cost)}
-                                    </span>
-                                    <button onclick="recordScheduleToExpense('${item.id}', '${dateId}')" title="家計簿に記録" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold transition">
-                                        計上
-                                    </button>
-                                ` : ''}
                                 <button onclick="deleteScheduleItem('${item.id}', '${dateId}')" title="削除" class="text-slate-400 hover:text-uknavy p-1 transition">
                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
@@ -1326,16 +1326,16 @@
             let categoryLabel = '';
             let categoryClass = '';
             if (item.category === 'sightseeing') {
-                categoryLabel = '🏛 観光スポット';
+                categoryLabel = '🏛 Sightseeing';
                 categoryClass = 'bg-red-50 text-uknavy border-red-200';
             } else if (item.category === 'dining') {
-                categoryLabel = item.dineType || '☕️ 食事';
+                categoryLabel = `🍽️ Dining (${item.dineType || 'Breakfast'})`;
                 categoryClass = 'bg-amber-50 text-ukgold border-amber-200';
             } else if (item.category === 'transport') {
-                categoryLabel = `🚌 ${item.mode}`;
+                categoryLabel = `🚌 Transit (${item.mode})`;
                 categoryClass = 'bg-slate-100 text-slate-800 border-slate-200';
             } else {
-                categoryLabel = '💡 その他';
+                categoryLabel = '💡 Others';
                 categoryClass = 'bg-slate-100 text-ukcinder border-slate-200';
             }
 
@@ -1362,8 +1362,9 @@
                 `;
             } else if (item.category === 'dining') {
                 titleEl.textContent = item.name;
+                const cleanDineType = (item.dineType || 'Breakfast').replace(/[🍳🥪🍷☕️🍺]/g, '').trim();
                 bodyEl.innerHTML = `
-                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-amber-900">ジャンル:</span> ${window.escapeHtml(item.dineType || '食事')}</div>
+                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 flex items-center gap-2"><span class="font-bold text-amber-900">ジャンル:</span> <span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(item.dineType)}">${window.escapeHtml(cleanDineType)}</span></div>
                     ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
                     <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
                         <span class="text-ukcinder/80 font-medium">予算目安:</span>
@@ -1437,20 +1438,20 @@
 
             document.getElementById('budgetModalTitle').innerHTML = `<i class="fa-solid fa-coins text-ukgold"></i> 1日の目標予算を設定`;
             document.getElementById('budgetModalDateLabel').textContent = isAll
-                ? `全日程一括：1日あたりの予算上限 (£ GBP) ※8日間合計に反映されます`
+                ? `全日程一括：1日あたりの予算上限 (£ GBP) ※7日間合計に反映されます`
                 : `${dateObj.jp} の予算上限 (£ GBP)`;
             document.getElementById('modalInputLabel').textContent = '合計予算額 (£ GBP)';
             
             const input = document.getElementById('modalBudgetInput');
             input.value = currentBudget;
             document.getElementById('modalBudgetJpyPreview').textContent = isAll
-                ? `≈ ${window.formatJpy(currentBudget)} /日（8日間計: ${window.formatGbp(currentBudget * 8)} / ${window.formatJpy(currentBudget * 8)}）`
+                ? `≈ ${window.formatJpy(currentBudget)} /日（7日間計: ${window.formatGbp(currentBudget * 7)} / ${window.formatJpy(currentBudget * 7)}）`
                 : `≈ ${window.formatJpy(currentBudget)} JPY`;
 
             input.oninput = () => {
                 const v = parseFloat(input.value) || 0;
                 document.getElementById('modalBudgetJpyPreview').textContent = isAll
-                    ? `≈ ${window.formatJpy(v)} /日（8日間計: ${window.formatGbp(v * 8)} / ${window.formatJpy(v * 8)}）`
+                    ? `≈ ${window.formatJpy(v)} /日（7日間計: ${window.formatGbp(v * 7)} / ${window.formatJpy(v * 7)}）`
                     : `≈ ${window.formatJpy(v)} JPY`;
             };
 
@@ -1481,13 +1482,13 @@
             const input = document.getElementById('modalBudgetInput');
             input.value = currentSub;
             document.getElementById('modalBudgetJpyPreview').textContent = isAll
-                ? `≈ ${window.formatJpy(currentSub)} /日（8日間計: ${window.formatGbp(currentSub * 8)} / ${window.formatJpy(currentSub * 8)}）`
+                ? `≈ ${window.formatJpy(currentSub)} /日（7日間計: ${window.formatGbp(currentSub * 7)} / ${window.formatJpy(currentSub * 7)}）`
                 : `≈ ${window.formatJpy(currentSub)} JPY`;
 
             input.oninput = () => {
                 const v = parseFloat(input.value) || 0;
                 document.getElementById('modalBudgetJpyPreview').textContent = isAll
-                    ? `≈ ${window.formatJpy(v)} /日（8日間計: ${window.formatGbp(v * 8)} / ${window.formatJpy(v * 8)}）`
+                    ? `≈ ${window.formatJpy(v)} /日（7日間計: ${window.formatGbp(v * 7)} / ${window.formatJpy(v * 7)}）`
                     : `≈ ${window.formatJpy(v)} JPY`;
             };
 
@@ -1520,7 +1521,7 @@
                     window.saveState();
                     window.closeBudgetModal();
                     window.renderBudget();
-                    window.showToast(`全8日間の1日あたり予算を ${window.formatGbp(val)} に更新しました`);
+                    window.showToast(`全7日間の1日あたり予算を ${window.formatGbp(val)} に更新しました`);
                 } else {
                     window.appState.dailyBudgets[window.appState.selectedDate] = val;
                     if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
@@ -1548,7 +1549,7 @@
                     window.saveState();
                     window.closeBudgetModal();
                     window.renderBudget();
-                    window.showToast(`全8日間の「${catKey}」の予算を更新し、メイン予算を自動調整しました`);
+                    window.showToast(`全7日間の「${catKey}」の予算を更新し、メイン予算を自動調整しました`);
                 } else {
                     const dateId = window.appState.selectedDate;
                     if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
@@ -1685,7 +1686,7 @@
             document.getElementById('mainDonutPercent').textContent = `${remPercent}%`;
 
             const catConfigs = [
-                { key: '食事', icon: '☕️', label: '食事' },
+                { key: '食事', icon: '🍽️', label: '食事' },
                 { key: 'ショッピング', icon: '🛍', label: 'ショッピング' },
                 { key: '交通費', icon: '🚌', label: '交通費' },
                 { key: 'その他', icon: '💡', label: 'その他' }
