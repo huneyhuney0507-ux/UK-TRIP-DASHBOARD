@@ -70,3 +70,1597 @@
         }
     </style>
 </head>
+<body class="text-ukcinder antialiased min-h-screen flex flex-col pb-24 max-w-md mx-auto sm:max-w-6xl shadow-2xl bg-[#F4F0E8]">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-[90vw]"></div>
+
+    <!-- Custom Modal for Editing Daily Budget -->
+    <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-uksidewalk animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-ukcinder text-base flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-ukgold"></i> 1日の目標予算を設定
+                </h3>
+                <button onclick="closeBudgetModal()" class="text-slate-400 hover:text-ukcinder p-2 rounded-full">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4" id="budgetModalDateLabel">12月1日 (火) の予算上限 (£ GBP)</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">予算額 (£ GBP)</label>
+                    <input type="number" id="modalBudgetInput" step="1" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xl font-bold text-ukcinder focus:outline-none focus:border-uknavy">
+                    <p class="text-xs text-slate-400 mt-1 text-right" id="modalBudgetJpyPreview">≈ ¥21,082 JPY</p>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeBudgetModal()" class="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
+                        キャンセル
+                    </button>
+                    <button type="button" onclick="saveDailyTotalBudget()" class="flex-1 py-3 rounded-xl bg-uknavy text-white text-sm font-semibold hover:bg-ukcinder transition shadow">
+                        保存する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Detail Modal (Pop-up on item tap) -->
+    <div id="scheduleDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeScheduleDetailModalOnBackdrop(event)">
+        <div class="bg-[#ebc156] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-ukcinder/20 animate-fade-in space-y-4" onclick="event.stopPropagation()">
+            <!-- Top Header -->
+            <div class="flex justify-between items-start gap-2 border-b border-ukcinder/15 pb-3">
+                <div class="space-y-4">
+                    <div id="modalDetailBadgeContainer" class="flex items-center gap-1.5 flex-wrap">
+                        <!-- Dynamic Category / Date badges -->
+                    </div>
+                    <h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">--</h3>
+                </div>
+                <button onclick="closeScheduleDetailModal()" class="text-ukcinder/70 hover:text-ukcinder p-1.5 rounded-full bg-white/50 hover:bg-white/80 transition shrink-0">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Content Details -->
+            <div class="space-y-3 text-xs text-ukcinder" id="modalDetailBody">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- Action Buttons at bottom -->
+            <div class="pt-2 flex gap-2" id="modalDetailFooterActions">
+                <!-- Action buttons injected via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Banner (Optimized for iPhone notch/safe-area) -->
+    <header class="bg-[#154673] text-white shadow-md sticky top-0 z-40 pt-safe">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 sm:py-5">
+            <div class="flex items-center justify-between gap-2">
+                <div class="text-left">
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-anton text-lg sm:text-2xl tracking-wider text-amber-100 leading-tight">UK TRIP DASHBOARD</h1>
+                        <!-- Offline Status Badge -->
+                        <span id="offlineBadge" class="hidden text-[9px] bg-amber-500/80 text-white font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <i class="fa-solid fa-wifi-slash"></i> オフライン
+                        </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-amber-100/80">2026.12.01 - 12.08 (8 Days in UK)</p>
+                </div>
+
+                <!-- Currency Rate Bar (Compact Mobile Style) -->
+                <div class="bg-[#c2352f] border border-white/25 rounded-2xl p-1.5 px-3 flex items-center gap-2 shadow-inner text-xs">
+                    <div class="flex items-center gap-1 text-white font-medium text-[11px]">
+                        <span>1£=</span>
+                        <input type="number" id="exchangeRateInput" step="0.01" value="210.82" 
+                               class="w-16 bg-black/25 border border-white/30 rounded-lg px-1.5 py-0.5 text-right text-white font-bold focus:outline-none focus:border-white text-xs">
+                        <span class="text-white/90 text-[10px]">円</span>
+                    </div>
+                    <button id="updateRateBtn" onclick="updateExchangeRate()" title="レート更新" class="text-[10px] bg-black/20 hover:bg-black/35 text-white p-1.5 rounded-lg border border-white/30 transition font-medium flex items-center">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bottom Navigation Bar for Mobile (iPhone Thumb-friendly) -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto sm:max-w-6xl bg-[#c2352f]/95 backdrop-blur-md border-t border-red-800 z-40 pb-safe">
+        <div class="grid grid-cols-3 h-16">
+            <button id="tabItineraryBtn" onclick="switchMainTab('itinerary')" class="flex flex-col items-center justify-center gap-1 text-white font-bold">
+                <i class="fa-regular fa-calendar-days text-lg"></i>
+                <span class="text-[10px]">SCHEDULE</span>
+            </button>
+            <button id="tabBudgetBtn" onclick="switchMainTab('budget')" class="flex flex-col items-center justify-center gap-1 text-white/70 font-medium">
+                <i class="fa-solid fa-wallet text-lg"></i>
+                <span class="text-[10px]">BUDGET</span>
+            </button>
+            <button id="tabChecklistBtn" onclick="switchMainTab('checklist')" class="flex flex-col items-center justify-center gap-1 text-white/70 font-medium">
+                <i class="fa-solid fa-list-check text-lg"></i>
+                <span class="text-[10px]">PACK LIST</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-3.5 sm:px-4 mt-3 flex-1 w-full">
+
+        <!-- Date Selector Navigation Bar (Horizontal Scroll for iPhone Aspect Ratio) -->
+        <div id="dateSelectorBar" class="mb-4 bg-white p-2.5 rounded-2xl shadow-sm border border-uksidewalk">
+            <div class="text-[11px] font-semibold text-slate-500 px-1 mb-2 flex justify-between items-center">
+                <span><i class="fa-solid fa-plane-departure mr-1 text-uknavy"></i> 日程を選択</span>
+                <span id="currentSelectedDateLabel" class="text-uknavy font-bold text-xs">12/01 (Tue)</span>
+            </div>
+            <!-- Horizontal Carousel for smooth swipe on mobile -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 snap-x" id="dateButtonsContainer">
+                <!-- Date buttons injected dynamically -->
+            </div>
+        </div>
+
+        <!-- ================= SECTION 1: ITINERARY & SCHEDULE ================= -->
+        <section id="sectionItinerary" class="space-y-4 animate-fade-in">
+            <!-- Timeline on Top -->
+            <div class="bg-white rounded-2xl p-4 sm:p-6 border border-uksidewalk shadow-sm min-h-[300px] flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2.5">
+                    <h3 class="font-bold text-ukcinder text-sm sm:text-base flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock text-uknavy"></i> タイムライン
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span id="dailyEstimatedSum" class="text-[11px] sm:text-xs font-bold text-uknavy bg-amber-50 border border-ukgold/40 px-2 py-0.5 rounded-lg">予定計: £0.00</span>
+                    </div>
+                </div>
+
+                <div id="scheduleTimeline" class="space-y-3 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-uksidewalk/50 flex-1">
+                    <!-- Timeline Items injected dynamically -->
+                </div>
+            </div>
+
+            <!-- Add Schedule Form Card -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-uksidewalk shadow-sm">
+                <h3 class="font-bold text-ukcinder text-sm mb-3 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-plus text-ukgold"></i> 新しいスケジュールを追加</span>
+                    <span id="scheduleCountBadge" class="bg-ukgold/20 text-ukcinder font-bold text-xs px-2 py-0.5 rounded-full border border-ukgold/40">0 件</span>
+                </h3>
+
+                <form id="addScheduleForm" onsubmit="handleAddSchedule(event)" class="space-y-3">
+                    <!-- Category Selector Tabs -->
+                    <div>
+                        <label class="block text-[11px] text-slate-500 mb-1 font-medium">カテゴリー</label>
+                        <div class="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+                            <button type="button" onclick="setFormCategory('sightseeing')" id="catBtn_sightseeing" class="py-2 rounded-lg bg-white text-uknavy shadow transition text-center">🏛 観光</button>
+                            <button type="button" onclick="setFormCategory('dining')" id="catBtn_dining" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">☕️ 食事</button>
+                            <button type="button" onclick="setFormCategory('transport')" id="catBtn_transport" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">🚌 移動</button>
+                            <button type="button" onclick="setFormCategory('other')" id="catBtn_other" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">💡 その他</button>
+                        </div>
+                    </div>
+
+                    <!-- Common: Time -->
+                    <div class="w-full overflow-hidden">
+                        <label class="block text-[11px] text-slate-500 mb-1 font-medium">時間</label>
+                        <input type="time" id="schedTime" required value="12:00" class="w-full min-w-0 box-border appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:border-uknavy font-semibold">
+                    </div>
+
+                    <!-- Dynamic: Sightseeing Form -->
+                    <div id="formFields_sightseeing" class="space-y-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">スポット名 <span class="text-uknavy">*</span></label>
+                            <input type="text" id="sightSpot" placeholder="例: 大英博物館" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">メモ</label>
+                            <input type="text" id="sightAction" placeholder="例: 展示見学・事前予約あり" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div class="hidden">
+                            <input type="text" id="sightMemo">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">Google Map URL</label>
+                            <input type="url" id="sightMapUrl" placeholder="https://maps.google.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic: Dining Form -->
+                    <div id="formFields_dining" class="space-y-2.5 hidden">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">種別</label>
+                                <select id="dineType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:border-uknavy font-semibold">
+                                    <option value="朝食 🍳">朝食 🍳</option>
+                                    <option value="ランチ 🥪">ランチ 🥪</option>
+                                    <option value="ディナー 🍷">ディナー 🍷</option>
+                                    <option value="カフェ/ティー ☕️">カフェ ☕️</option>
+                                    <option value="パブ 🍺">パブ 🍺</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">店名 <span class="text-uknavy">*</span></label>
+                                <input type="text" id="dineName" placeholder="例: The Ritz" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">メモ</label>
+                            <input type="text" id="dineMemo" placeholder="例: アフタヌーンティー予約" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">予約・参考URL</label>
+                            <input type="url" id="dineUrl" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic: Transport Form -->
+                    <div id="formFields_transport" class="space-y-2.5 hidden">
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">交通手段</label>
+                            <select id="transMode" onchange="toggleTransportLineOptions()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy font-semibold">
+                                <option value="Underground">🚇 地下鉄 (Underground)</option>
+                                <option value="Bus">🚌 路線バス (Bus)</option>
+                                <option value="Train">🚆 鉄道 (Train)</option>
+                                <option value="Walking">🚶 徒歩 (Walking)</option>
+                                <option value="Taxi">🚖 タクシー / Uber</option>
+                                <option value="Flight">✈️ 飛行機 (Flight)</option>
+                            </select>
+                        </div>
+
+                        <!-- Underground Specific Line Select -->
+                        <div id="undergroundLineContainer" class="space-y-1">
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">路線 (Line)</label>
+                            <select id="transLine" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                                <option value="Piccadilly">Piccadilly Line</option>
+                                <option value="Bakerloo">Bakerloo Line</option>
+                                <option value="Central">Central Line</option>
+                                <option value="District">District Line</option>
+                                <option value="Jubilee">Jubilee Line</option>
+                                <option value="Northern">Northern Line</option>
+                                <option value="Victoria">Victoria Line</option>
+                                <option value="Elizabeth">Elizabeth Line</option>
+                                <option value="Circle">Circle Line</option>
+                                <option value="Metropolitan">Metropolitan Line</option>
+                            </select>
+                        </div>
+
+                        <!-- Bus Number / Detail Input -->
+                        <div id="busDetailContainer" class="space-y-1 hidden">
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">系統番号</label>
+                            <input type="text" id="transBusNo" placeholder="例: 24" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+
+                        <!-- Departure & Destination -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">出発地 <span class="text-uknavy">*</span></label>
+                                <input type="text" id="transFrom" placeholder="例: Paddington" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">目的地 <span class="text-uknavy">*</span></label>
+                                <input type="text" id="transTo" placeholder="例: Westminster" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">所要時間</label>
+                                <input type="text" id="transDuration" placeholder="例: 25分" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">運賃 (£ GBP)</label>
+                                <input type="number" step="0.01" min="0" id="transFare" placeholder="0.00" value="0.00" oninput="updateTransportCostPreview()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic: Other Form -->
+                    <div id="formFields_other" class="space-y-2.5 hidden">
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">タイトル <span class="text-uknavy">*</span></label>
+                            <input type="text" id="otherTitle" placeholder="例: ホテルチェックイン" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">メモ</label>
+                            <input type="text" id="otherMemo" placeholder="例: 荷物を預ける" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                    </div>
+
+                    <!-- Estimated Cost Input (Shared for non-transport) -->
+                    <div id="estimatedCostContainer">
+                        <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">予想予算 (£ GBP)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.01" min="0" id="schedCost" placeholder="0.00" value="0.00" oninput="updateSchedCostPreview()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                            <span id="schedCostJpyPreview" class="text-xs text-slate-500 font-medium whitespace-nowrap bg-slate-100 px-3 py-2.5 rounded-xl">≈ ¥0</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-uknavy hover:bg-ukcinder text-white font-semibold py-3 rounded-xl text-sm transition shadow-md mt-2 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> 予定を追加
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: BUDGET & EXPENSE ================= -->
+        <section id="sectionBudget" class="space-y-4 hidden animate-fade-in">
+            
+            <!-- Main Top Banner: Overall Daily Remaining Budget -->
+            <div class="bg-white rounded-3xl p-5 sm:p-6 border border-uksidewalk shadow-sm relative overflow-hidden">
+                <div class="flex flex-col items-center text-center gap-4">
+                    
+                    <div class="flex items-center gap-1.5 text-slate-500 font-bold text-sm">
+                        <i class="fa-solid fa-wallet text-ukgold"></i>
+                        <span id="budgetDateHeading">12/01 の残りの予算</span>
+                    </div>
+                    
+                    <!-- Remaining Big Text & Slash Total Budget -->
+                    <div class="space-y-1">
+                        <div class="flex items-baseline justify-center gap-1.5">
+                            <span class="text-4xl sm:text-5xl font-black text-ukcinder tracking-tight" id="mainRemGbp">£100.00</span>
+                            <span class="text-slate-500 font-semibold text-sm" id="mainRemJpy">(=¥21,082)</span>
+                        </div>
+                        
+                        <div class="flex items-center justify-center gap-1.5 text-slate-500 font-semibold text-sm pt-1">
+                            <span>上限:</span>
+                            <span id="mainTotalGbp" class="font-bold text-ukcinder">£100.00</span>
+                            <span class="text-xs text-slate-400" id="mainTotalJpy">(=¥21,082)</span>
+                            <button onclick="promptEditDailyTotalBudget()" class="ml-1 text-xs text-uknavy hover:bg-amber-50 px-2 py-1 rounded-lg border border-ukgold/40 transition font-semibold">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Donut Progress Line (Mobile Friendly alternative to large circle) -->
+                    <div class="w-full max-w-xs space-y-1.5 pt-1">
+                        <div class="flex justify-between text-xs font-bold px-1">
+                            <span class="text-slate-400 uppercase tracking-wider">REMAINING</span>
+                            <span id="mainDonutPercent" class="text-uknavy font-extrabold">100%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                            <div id="mainDonutBar" class="bg-uknavy h-full transition-all duration-500 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Cumulative Total -->
+                    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] text-slate-600">
+                        <span>8日間累計支出: <strong class="text-ukcinder" id="tripTotalSpentGbp">£0.00</strong></span>
+                        <span class="text-slate-300">|</span>
+                        <span id="tripTotalSpentJpy">¥0</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Sub Category Cards Grid (2x2 on Mobile) -->
+            <div class="grid grid-cols-2 gap-2.5" id="categoryCardsGrid">
+                <!-- Dining, Shopping, Transport, Other Cards dynamically generated -->
+            </div>
+
+            <!-- Expense Entry & Log Section -->
+            <div class="space-y-4 pt-1">
+                <!-- Add Expense Form -->
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-uksidewalk shadow-sm">
+                    <h3 class="font-bold text-ukcinder text-sm mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-cart-plus text-uknavy"></i> 支出を記録
+                    </h3>
+                    <form id="addExpenseForm" onsubmit="handleAddExpense(event)" class="space-y-3">
+                        <div id="expenseDateSelectContainer" class="hidden">
+                            <label class="block text-[11px] text-slate-500 mb-1 font-medium">日付</label>
+                            <select id="expTargetDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-ukcinder focus:outline-none focus:border-uknavy">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-1 font-medium">品名・使用目的 <span class="text-uknavy">*</span></label>
+                            <input type="text" id="expTitle" placeholder="例: スコーン & ティー" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1 font-medium">金額 (£ GBP) <span class="text-uknavy">*</span></label>
+                                <input type="number" step="0.01" min="0.01" id="expAmount" placeholder="0.00" oninput="updateExpenseJpyPreview()" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1 font-medium">カテゴリ</label>
+                                <select id="expCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                                    <option value="食事">☕️ 食事</option>
+                                    <option value="ショッピング">🛍 ショッピング</option>
+                                    <option value="交通費">🚌 交通費</option>
+                                    <option value="その他">💡 その他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                            <span>円換算目安:</span>
+                            <span class="font-bold text-ukcinder text-sm" id="expCalcJpy">¥0 JPY</span>
+                        </div>
+                        <button type="submit" class="w-full bg-uknavy hover:bg-ukcinder text-white font-semibold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> 支出を追加
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Expense History Table -->
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-uksidewalk shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-ukcinder text-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-ol text-uknavy"></i> <span id="expenseTableHeading">本日の支出明細</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-400 font-medium" id="expenseItemCount">0 件</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs sm:text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 text-[10px] uppercase">
+                                    <th id="expenseDateColHeader" class="pb-2 font-semibold hidden">日付</th>
+                                    <th class="pb-2 font-semibold">項目</th>
+                                    <th class="pb-2 font-semibold text-right">£ ポンド</th>
+                                    <th class="pb-2 font-semibold text-right">¥ 円</th>
+                                    <th class="pb-2 font-semibold text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseTableBody" class="divide-y divide-slate-100">
+                                <!-- Dynamic expense rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: CHECKLIST ================= -->
+        <section id="sectionChecklist" class="space-y-4 hidden animate-fade-in">
+            <!-- Progress Banner -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-uksidewalk shadow-sm space-y-3">
+                <div class="space-y-1">
+                    <h2 class="font-bold text-ukcinder text-base flex items-center gap-2">
+                        <i class="fa-solid fa-suitcase text-ukgold"></i> パッキング・持ち物リスト
+                    </h2>
+                    <p class="text-xs text-slate-500">パスポート、BFタイプ変換プラグ、防寒具等のチェック。</p>
+                </div>
+                <div class="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-slate-600">準備完了度 (<span id="checklistCountText">0/0</span>)</span>
+                        <span id="checklistPercentText" class="text-uknavy">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div id="checklistProgressBar" class="bg-ukgold h-full transition-all duration-500 w-0 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Checklist Item -->
+            <div class="bg-white p-3.5 rounded-2xl border border-uksidewalk shadow-sm">
+                <form id="addChecklistForm" onsubmit="handleAddChecklistItem(event)" class="flex flex-col gap-2">
+                    <select id="checkCategory" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-ukcinder focus:outline-none focus:border-uknavy">
+                        <option value="貴重品・書類">🛂 貴重品・書類</option>
+                        <option value="電子機器・通信">🔌 電子機器・通信</option>
+                        <option value="衣類・防寒具">🧥 衣類・防寒具</option>
+                        <option value="日用品・常備薬">💊 日用品・常備薬</option>
+                    </select>
+                    <div class="flex gap-2">
+                        <input type="text" id="checkItemName" placeholder="持ち物を入力（例: 折りたたみ傘）" required class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-uknavy">
+                        <button type="submit" class="bg-uknavy hover:bg-ukcinder text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition shadow shrink-0">
+                            追加
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Checklist Categories Grid -->
+            <div id="checklistGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Category cards injected dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-4 mt-8 text-center text-[10px] text-slate-400">
+        <p>🇬🇧 UK Travel Companion — Have a wonderful journey!</p>
+    </footer>
+
+    <script>
+        // ==========================================
+        // STATE & INITIAL DATA (Persisted in LocalStorage)
+        // ==========================================
+        const TRIP_DATES = [
+            { id: '2026-12-01', short: '12/01', day: 'Tue', jp: '12月1日 (火)', tip: 'ロンドン到着日はコンタクトレス決済対応カードやオイスターカードの準備、時差ボケ対策を優先しましょう。' },
+            { id: '2026-12-02', short: '12/02', day: 'Wed', jp: '12月2日 (水)', tip: 'ウェストミンスター周辺やバッキンガム宮殿の衛兵交代式（11:00頃開始）は早めの場所取りがおすすめです。' },
+            { id: '2026-12-03', short: '12/03', day: 'Thu', jp: '12月3日 (木)', tip: '大英博物館やナショナル・ギャラリーなど国立美術館は基本無料ですが、事前日時指定予約をしておくとスムーズです。' },
+            { id: '2026-12-04', short: '12/04', day: 'Fri', jp: '12月4日 (金)', tip: 'バラ・マーケット（Borough Market）は午前中〜ランチ前が比較的空いていて食べ歩きに最適です。' },
+            { id: '2026-12-05', short: '12/05', day: 'Sat', jp: '12月5日 (土)', tip: '週末はノッティングヒル（ポートベロー・マーケット）やコヴェント・ガーデンの活気あるマーケット散策がおすすめ！' },
+            { id: '2026-12-06', short: '12/06', day: 'Sun', jp: '12月6日 (日)', tip: '日曜日はパブで伝統料理「サンデーロースト」を楽しむ絶好の機会。人気店は事前予約が安心です。' },
+            { id: '2026-12-07', short: '12/07', day: 'Mon', jp: '12月7日 (月)', tip: '12月のロンドンは16時頃から暗くなり始めます。オックスフォード・ストリートやリージェント・ストリートのクリスマスイルミネーションが必見です！' },
+            { id: '2026-12-08', short: '12/08', day: 'Tue', jp: '12月8日 (火)', tip: '帰国日はヒースロー空港へ余裕を持って出発しましょう（出発3時間前到着が目安）。' }
+        ];
+
+        const STORAGE_KEY = 'uk_travel_companion_v1';
+
+        const DEFAULT_STATE = {
+            exchangeRate: 210.82,
+            selectedDate: '2026-12-01',
+            activeTab: 'itinerary',
+            formCategory: 'sightseeing',
+            dailyBudgets: {
+                '2026-12-01': 120,
+                '2026-12-02': 100,
+                '2026-12-03': 100,
+                '2026-12-04': 120,
+                '2026-12-05': 150,
+                '2026-12-06': 100,
+                '2026-12-07': 150,
+                '2026-12-08': 80
+            },
+            schedules: {
+                '2026-12-01': [
+                    {
+                        id: 's1',
+                        category: 'transport',
+                        time: '14:30',
+                        mode: 'Underground',
+                        line: 'Elizabeth',
+                        from: 'Heathrow Terminal 2 & 3',
+                        to: 'Paddington Station',
+                        duration: '30m',
+                        cost: 12.80
+                    },
+                    {
+                        id: 's2',
+                        category: 'other',
+                        time: '15:30',
+                        title: 'ホテル チェックイン & 休憩',
+                        memo: 'パディントン駅近くのホテルに荷物を置いて小休憩',
+                        cost: 0
+                    },
+                    {
+                        id: 's3',
+                        category: 'dining',
+                        time: '18:30',
+                        dineType: 'パブ 🍺',
+                        name: 'The Pride of Paddington',
+                        memo: '本場のフィッシュ＆チップスとエールビールで乾杯',
+                        url: '',
+                        cost: 28.50
+                    }
+                ],
+                '2026-12-02': [
+                    {
+                        id: 's4',
+                        category: 'sightseeing',
+                        time: '10:00',
+                        spot: 'ビッグ・ベン & ウェストミンスター寺院',
+                        action: 'テムズ川沿いの散策と記念撮影',
+                        memo: '11:00からのバッキンガム宮殿衛兵交代式へ徒歩移動',
+                        mapUrl: 'https://maps.google.com/?q=Big+Ben+London',
+                        cost: 0
+                    },
+                    {
+                        id: 's5',
+                        category: 'dining',
+                        time: '14:00',
+                        dineType: 'カフェ/ティー ☕️',
+                        name: 'Fortnum & Mason (Diamond Jubilee Tea Salon)',
+                        memo: '事前予約済み・伝統のアフタヌーンティー',
+                        url: 'https://www.fortnumandmason.com/',
+                        cost: 82.00
+                    }
+                ]
+            },
+            expenses: {
+                '2026-12-01': [
+                    { id: 'e1', title: 'ヒースロー〜市内 鉄道運賃', category: '交通費', amount: 12.80 },
+                    { id: 'e2', title: 'パブ夕食 (フィッシュ&チップス)', category: '食事', amount: 28.50 }
+                ]
+            },
+            checklist: [
+                { id: 'c1', category: '貴重品・書類', text: 'パスポート（残存有効期間確認）', checked: true },
+                { id: 'c2', category: '貴重品・書類', text: 'UK ETA（電子渡航認証）承認確認', checked: true },
+                { id: 'c3', category: '貴重品・書類', text: 'タッチ決済対応クレジットカード（2枚以上）', checked: false },
+                { id: 'c4', category: '貴重品・書類', text: '海外旅行保険証・eチケット控え', checked: false },
+                { id: 'c5', category: '電子機器・通信', text: 'BFタイプ変換プラグ（イギリス用3つ穴）', checked: true },
+                { id: 'c6', category: '電子機器・通信', text: '海外eSIM / SIMカード準備', checked: false },
+                { id: 'c7', category: '電子機器・通信', text: 'モバイルバッテリー & 充電ケーブル', checked: false },
+                { id: 'c8', category: '衣類・防寒具', text: '厚手のコート・ダウンジャケット（12月は真冬）', checked: false },
+                { id: 'c9', category: '衣類・防寒具', text: 'マフラー・手袋・ニット帽', checked: false },
+                { id: 'c10', category: '衣類・防寒具', text: '履き慣れた防水性のあるスニーカー/ブーツ', checked: false },
+                { id: 'c11', category: '日用品・常備薬', text: '折りたたみ傘（ロンドンの通り雨対策）', checked: false },
+                { id: 'c12', category: '日用品・常備薬', text: '常備薬・乾燥対策リップ/保湿クリーム', checked: false }
+            ]
+        };
+
+        let appState = loadState();
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    return { ...DEFAULT_STATE, ...parsed };
+                }
+            } catch (e) {
+                console.error('Failed to load state:', e);
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.error('Failed to save state:', e);
+            }
+        }
+
+        // ==========================================
+        // UTILITY & FORMATTING
+        // ==========================================
+        function formatGbp(val) {
+            return '£' + Number(val || 0).toFixed(2);
+        }
+
+        function formatJpy(gbpVal) {
+            const jpy = Math.round(Number(gbpVal || 0) * appState.exchangeRate);
+            return '¥' + jpy.toLocaleString('ja-JP');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-700' : 'bg-uknavy';
+            const iconClass = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check text-ukgold';
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2.5 animate-fade-in pointer-events-auto border border-white/10`;
+            toast.innerHTML = `<i class="fa-solid ${iconClass} text-sm"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 2600);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ==========================================
+        // NAVIGATION & HEADER CONTROLS
+        // ==========================================
+        function updateExchangeRate() {
+            const input = document.getElementById('exchangeRateInput');
+            const rate = parseFloat(input.value);
+            if (isNaN(rate) || rate <= 0) {
+                showToast('有効な為替レートを入力してください', 'error');
+                return;
+            }
+            appState.exchangeRate = rate;
+            saveState();
+            updateSchedCostPreview();
+            updateExpenseJpyPreview();
+            renderAll();
+            showToast(`為替レートを 1 GBP = ¥${rate.toFixed(2)} に更新しました`);
+        }
+
+        function switchMainTab(tabName) {
+            appState.activeTab = tabName;
+            saveState();
+
+            const tabs = ['itinerary', 'budget', 'checklist'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+                const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (t === tabName) {
+                    btn.className = 'flex flex-col items-center justify-center gap-1 text-white font-bold';
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.className = 'flex flex-col items-center justify-center gap-1 text-white/70 font-medium';
+                    sec.classList.add('hidden');
+                }
+            });
+
+            // Hide date selector on checklist tab
+            const dateBar = document.getElementById('dateSelectorBar');
+            if (tabName === 'checklist') {
+                dateBar.classList.add('hidden');
+            } else {
+                dateBar.classList.remove('hidden');
+            }
+
+            renderAll();
+        }
+
+        function selectDate(dateId) {
+            appState.selectedDate = dateId;
+            saveState();
+            renderAll();
+        }
+
+        function renderDateButtons() {
+            const container = document.getElementById('dateButtonsContainer');
+            const isAllSelected = appState.selectedDate === 'ALL';
+            const currentObj = TRIP_DATES.find(d => d.id === appState.selectedDate) || TRIP_DATES[0];
+            
+            document.getElementById('currentSelectedDateLabel').textContent = isAllSelected
+                ? '全体 (12/01 - 12/08)'
+                : `${currentObj.short} (${currentObj.day})`;
+
+            const totalSchedCount = TRIP_DATES.reduce((sum, d) => sum + (appState.schedules[d.id] || []).length, 0);
+
+            const allBtnHtml = `
+                <button onclick="selectDate('ALL')" 
+                        class="flex flex-col items-center justify-center py-2 px-3 rounded-xl border text-center transition shrink-0 snap-align-start relative min-w-[60px] ${
+                            isAllSelected 
+                            ? 'bg-uknavy text-white border-uknavy shadow-md ring-2 ring-ukgold/60' 
+                            : 'bg-amber-50/80 hover:bg-amber-100 text-uknavy border-amber-200'
+                        }">
+                    <span class="text-[9px] font-bold uppercase ${isAllSelected ? 'text-ukgold' : 'text-amber-700'}">ALL</span>
+                    <span class="text-xs font-extrabold leading-tight mt-0.5">全体</span>
+                    <span class="text-[9px] ${isAllSelected ? 'text-slate-300' : 'text-slate-500'}">8日間</span>
+                    ${totalSchedCount > 0 ? `<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${isAllSelected ? 'bg-ukgold' : 'bg-ukred'}"></span>` : ''}
+                </button>
+            `;
+
+            const dayBtnsHtml = TRIP_DATES.map((d, idx) => {
+                const isSelected = d.id === appState.selectedDate;
+                const schedCount = (appState.schedules[d.id] || []).length;
+                return `
+                    <button onclick="selectDate('${d.id}')" 
+                            class="flex flex-col items-center justify-center py-2 px-3 rounded-xl border text-center transition shrink-0 snap-align-start relative min-w-[58px] ${
+                                isSelected 
+                                ? 'bg-uknavy text-white border-uknavy shadow-md ring-2 ring-ukgold/60' 
+                                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                            }">
+                        <span class="text-[9px] font-bold uppercase ${isSelected ? 'text-ukgold' : 'text-slate-400'}">Day ${idx + 1}</span>
+                        <span class="text-xs font-extrabold leading-tight mt-0.5">${d.short}</span>
+                        <span class="text-[9px] ${isSelected ? 'text-slate-300' : 'text-slate-400'}">${d.day}</span>
+                        ${schedCount > 0 ? `<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-ukgold' : 'bg-ukblue'}"></span>` : ''}
+                    </button>
+                `;
+            }).join('');
+
+            container.innerHTML = allBtnHtml + dayBtnsHtml;
+        }
+
+        // ==========================================
+        // SECTION 1: ITINERARY & SCHEDULE
+        // ==========================================
+        function setFormCategory(cat) {
+            appState.formCategory = cat;
+            const categories = ['sightseeing', 'dining', 'transport', 'other'];
+            categories.forEach(c => {
+                const btn = document.getElementById(`catBtn_${c}`);
+                const fields = document.getElementById(`formFields_${c}`);
+                if (c === cat) {
+                    btn.className = 'py-2 rounded-lg bg-white text-uknavy shadow transition';
+                    fields.classList.remove('hidden');
+                } else {
+                    btn.className = 'py-2 rounded-lg text-slate-600 hover:bg-white/50 transition';
+                    fields.classList.add('hidden');
+                }
+            });
+
+            // Hide shared estimated cost if transport (transport has its own fare input)
+            const estContainer = document.getElementById('estimatedCostContainer');
+            if (cat === 'transport') {
+                estContainer.classList.add('hidden');
+                toggleTransportLineOptions();
+            } else {
+                estContainer.classList.remove('hidden');
+            }
+        }
+
+        function toggleTransportLineOptions() {
+            const mode = document.getElementById('transMode').value;
+            const lineCont = document.getElementById('undergroundLineContainer');
+            const busCont = document.getElementById('busDetailContainer');
+
+            if (mode === 'Underground') {
+                lineCont.classList.remove('hidden');
+                busCont.classList.add('hidden');
+            } else if (mode === 'Bus') {
+                lineCont.classList.add('hidden');
+                busCont.classList.remove('hidden');
+            } else {
+                lineCont.classList.add('hidden');
+                busCont.classList.add('hidden');
+            }
+        }
+
+        function updateSchedCostPreview() {
+            const val = parseFloat(document.getElementById('schedCost').value) || 0;
+            document.getElementById('schedCostJpyPreview').textContent = `≈ ${formatJpy(val)}`;
+        }
+
+        function updateTransportCostPreview() {
+            // Optional hook if needed
+        }
+
+        function handleAddSchedule(e) {
+            e.preventDefault();
+            const dateId = appState.selectedDate === 'ALL' ? TRIP_DATES[0].id : appState.selectedDate;
+            const cat = appState.formCategory;
+            const time = document.getElementById('schedTime').value || '12:00';
+            let newItem = {
+                id: 'sched_' + Date.now(),
+                category: cat,
+                time: time,
+                cost: 0
+            };
+
+            if (cat === 'sightseeing') {
+                const spot = document.getElementById('sightSpot').value.trim();
+                if (!spot) { showToast('スポット名を入力してください', 'error'); return; }
+                newItem.spot = spot;
+                newItem.action = document.getElementById('sightAction').value.trim();
+                newItem.memo = document.getElementById('sightMemo').value.trim();
+                newItem.mapUrl = document.getElementById('sightMapUrl').value.trim();
+                newItem.cost = parseFloat(document.getElementById('schedCost').value) || 0;
+            } else if (cat === 'dining') {
+                const name = document.getElementById('dineName').value.trim();
+                if (!name) { showToast('店名を入力してください', 'error'); return; }
+                newItem.dineType = document.getElementById('dineType').value;
+                newItem.name = name;
+                newItem.memo = document.getElementById('dineMemo').value.trim();
+                newItem.url = document.getElementById('dineUrl').value.trim();
+                newItem.cost = parseFloat(document.getElementById('schedCost').value) || 0;
+            } else if (cat === 'transport') {
+                const from = document.getElementById('transFrom').value.trim();
+                const to = document.getElementById('transTo').value.trim();
+                if (!from || !to) { showToast('出発地と目的地を入力してください', 'error'); return; }
+                newItem.mode = document.getElementById('transMode').value;
+                newItem.line = document.getElementById('transLine').value;
+                newItem.busNo = document.getElementById('transBusNo').value.trim();
+                newItem.from = from;
+                newItem.to = to;
+                newItem.duration = document.getElementById('transDuration').value.trim();
+                newItem.cost = parseFloat(document.getElementById('transFare').value) || 0;
+            } else if (cat === 'other') {
+                const title = document.getElementById('otherTitle').value.trim();
+                if (!title) { showToast('件名・タイトルを入力してください', 'error'); return; }
+                newItem.title = title;
+                newItem.memo = document.getElementById('otherMemo').value.trim();
+                newItem.cost = parseFloat(document.getElementById('schedCost').value) || 0;
+            }
+
+            if (!appState.schedules[dateId]) {
+                appState.schedules[dateId] = [];
+            }
+            appState.schedules[dateId].push(newItem);
+            saveState();
+
+            // Reset text fields
+            document.getElementById('addScheduleForm').reset();
+            document.getElementById('schedTime').value = time;
+            setFormCategory(cat);
+            updateSchedCostPreview();
+
+            renderAll();
+            showToast(appState.selectedDate === 'ALL' ? 'Day 1 (12/01) の旅程に予定を追加しました' : '旅程に新しい予定を追加しました');
+        }
+
+        function deleteScheduleItem(id, targetDateId = null) {
+            const dateId = targetDateId || appState.selectedDate;
+            if (!appState.schedules[dateId]) return;
+            appState.schedules[dateId] = appState.schedules[dateId].filter(item => item.id !== id);
+            saveState();
+            renderAll();
+            showToast('予定を削除しました');
+        }
+
+        function recordScheduleToExpense(id, targetDateId = null) {
+            const dateId = targetDateId || appState.selectedDate;
+            const item = (appState.schedules[dateId] || []).find(s => s.id === id);
+            if (!item || !item.cost || item.cost <= 0) return;
+
+            let title = '';
+            let expCat = 'その他';
+            if (item.category === 'sightseeing') {
+                title = item.spot;
+                expCat = 'その他';
+            } else if (item.category === 'dining') {
+                title = `${item.name} (${item.dineType.split(' ')[0]})`;
+                expCat = '食事';
+            } else if (item.category === 'transport') {
+                title = `${item.mode}: ${item.from} → ${item.to}`;
+                expCat = '交通費';
+            } else {
+                title = item.title;
+                expCat = 'その他';
+            }
+
+            if (!appState.expenses[dateId]) appState.expenses[dateId] = [];
+            appState.expenses[dateId].push({
+                id: 'exp_' + Date.now(),
+                title: title,
+                category: expCat,
+                amount: Number(item.cost)
+            });
+            saveState();
+            renderAll();
+            showToast(`「${title}」(${formatGbp(item.cost)}) を家計簿に計上しました`);
+        }
+
+        function getTubeLineBadgeColor(line) {
+            const map = {
+                'Piccadilly': 'bg-[#003688] text-white',
+                'Bakerloo': 'bg-[#B36305] text-white',
+                'Central': 'bg-[#E32017] text-white',
+                'District': 'bg-[#00782A] text-white',
+                'Jubilee': 'bg-[#A0A5A9] text-slate-900',
+                'Northern': 'bg-[#000000] text-white',
+                'Victoria': 'bg-[#0098D4] text-white',
+                'Elizabeth': 'bg-[#6950A1] text-white',
+                'Circle': 'bg-[#FFD300] text-slate-900',
+                'Metropolitan': 'bg-[#9B0056] text-white'
+            };
+            return map[line] || 'bg-ukblue text-white';
+        }
+
+        function renderItinerary() {
+            const isAll = appState.selectedDate === 'ALL';
+            const timeline = document.getElementById('scheduleTimeline');
+
+            if (isAll) {
+                let allItems = [];
+                TRIP_DATES.forEach((d, idx) => {
+                    const dayList = [...(appState.schedules[d.id] || [])].sort((a, b) => a.time.localeCompare(b.time));
+                    dayList.forEach(item => {
+                        allItems.push({ ...item, _dateId: d.id, _dayLabel: `Day ${idx + 1} (${d.short})` });
+                    });
+                });
+
+                document.getElementById('scheduleCountBadge').textContent = `${allItems.length} 件`;
+                const estTotal = allItems.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
+                document.getElementById('dailyEstimatedSum').textContent = `8日間予定予算計: ${formatGbp(estTotal)} (${formatJpy(estTotal)})`;
+
+                if (allItems.length === 0) {
+                    timeline.innerHTML = `
+                        <div class="pl-10 py-12 text-center">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-lg">
+                                <i class="fa-regular fa-calendar-plus"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-500">予定はまだ登録されていません</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                timeline.innerHTML = allItems.map(item => buildTimelineItemHtml(item, item._dateId, item._dayLabel)).join('');
+                return;
+            }
+
+            const dateId = appState.selectedDate;
+            const items = [...(appState.schedules[dateId] || [])].sort((a, b) => a.time.localeCompare(b.time));
+            document.getElementById('scheduleCountBadge').textContent = `${items.length} 件`;
+
+            const estTotal = items.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
+            document.getElementById('dailyEstimatedSum').textContent = `予定予算計: ${formatGbp(estTotal)} (${formatJpy(estTotal)})`;
+
+            if (items.length === 0) {
+                timeline.innerHTML = `
+                    <div class="pl-10 py-12 text-center">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-lg">
+                            <i class="fa-regular fa-calendar-plus"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-500">この日の予定はまだ登録されていません</p>
+                        <p class="text-xs text-slate-400 mt-1">下のフォームから観光スポットや食事・移動を追加しましょう</p>
+                    </div>
+                `;
+                return;
+            }
+
+            timeline.innerHTML = items.map(item => buildTimelineItemHtml(item, dateId, null)).join('');
+        }
+
+        function buildTimelineItemHtml(item, dateId, dayPrefixLabel) {
+            let badgeHtml = '';
+            let dotColor = 'bg-uknavy';
+            let titleHtml = '';
+            let detailsHtml = '';
+
+            if (item.category === 'sightseeing') {
+                dotColor = 'bg-uknavy';
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 観光</span>`;
+                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${escapeHtml(item.spot)}</h4>`;
+                detailsHtml = `
+                    ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.action)}</p>` : ''}
+                    ${item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.memo)}</p>` : ''}
+                `;
+            } else if (item.category === 'dining') {
+                dotColor = 'bg-ukgold';
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">${escapeHtml(item.dineType || '☕️ 食事')}</span>`;
+                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${escapeHtml(item.name)}</h4>`;
+                detailsHtml = `
+                    ${item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.memo)}</p>` : ''}
+                `;
+            } else if (item.category === 'transport') {
+                dotColor = 'bg-slate-700';
+                let modeBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">🚌 ${escapeHtml(item.mode)}</span>`;
+                if (item.mode === 'Underground' && item.line) {
+                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${getTubeLineBadgeColor(item.line)}">${escapeHtml(item.line)} Line</span>`;
+                } else if (item.mode === 'Bus' && item.busNo) {
+                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-uknavy text-white">No. ${escapeHtml(item.busNo)}</span>`;
+                }
+                badgeHtml = modeBadge;
+                titleHtml = `
+                    <h4 class="font-bold text-ukcinder text-xs sm:text-sm flex items-center gap-1.5 flex-wrap">
+                        <span>${escapeHtml(item.from)}</span>
+                        <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
+                        <span>${escapeHtml(item.to)}</span>
+                    </h4>
+                `;
+                detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-regular fa-hourglass-half mr-1"></i>${escapeHtml(item.duration)}</p>` : '';
+            } else {
+                dotColor = 'bg-uksidewalk';
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 その他</span>`;
+                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${escapeHtml(item.title)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.memo)}</p>` : '';
+            }
+
+            const hasCost = Number(item.cost) > 0;
+            const dayTagHtml = dayPrefixLabel
+                ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${escapeHtml(dayPrefixLabel)}</span>`
+                : '';
+
+            return `
+                <div class="relative pl-7 group animate-fade-in">
+                    <div class="absolute left-1 top-2.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow"></div>
+                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" class="bg-white hover:bg-amber-50/40 active:bg-amber-50/80 cursor-pointer transition rounded-xl p-3 border border-uksidewalk/60 shadow-sm relative">
+                        <div class="flex flex-wrap justify-between items-start gap-1 mb-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                ${dayTagHtml}
+                                <span class="font-mono font-bold text-xs text-white bg-ukgold px-2 py-0.5 rounded-md">${escapeHtml(item.time)}</span>
+                                ${badgeHtml}
+                            </div>
+                            <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                                ${hasCost ? `
+                                    <span class="text-[11px] font-bold text-ukcinder bg-amber-50 border border-ukgold/40 px-1.5 py-0.5 rounded">
+                                        ${formatGbp(item.cost)}
+                                    </span>
+                                    <button onclick="recordScheduleToExpense('${item.id}', '${dateId}')" title="家計簿に記録" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold transition">
+                                        計上
+                                    </button>
+                                ` : ''}
+                                <button onclick="deleteScheduleItem('${item.id}', '${dateId}')" title="削除" class="text-slate-400 hover:text-uknavy p-1 transition">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        ${titleHtml}
+                        ${detailsHtml}
+                        <div class="text-[9px] text-slate-300 font-semibold text-right mt-1">タップで詳細を表示 ➔</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // SCHEDULE DETAIL MODAL CONTROLS
+        // ==========================================
+        function openScheduleDetailModal(id, dateId) {
+            const item = (appState.schedules[dateId] || []).find(s => s.id === id);
+            if (!item) return;
+
+            const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
+            const badgeCont = document.getElementById('modalDetailBadgeContainer');
+            const titleEl = document.getElementById('modalDetailTitle');
+            const bodyEl = document.getElementById('modalDetailBody');
+            const footerEl = document.getElementById('modalDetailFooterActions');
+
+            let categoryLabel = '';
+            let categoryClass = '';
+            if (item.category === 'sightseeing') {
+                categoryLabel = '🏛 観光スポット';
+                categoryClass = 'bg-red-50 text-uknavy border-red-200';
+            } else if (item.category === 'dining') {
+                categoryLabel = item.dineType || '☕️ 食事';
+                categoryClass = 'bg-amber-50 text-ukgold border-amber-200';
+            } else if (item.category === 'transport') {
+                categoryLabel = `🚌 ${item.mode}`;
+                categoryClass = 'bg-slate-100 text-slate-800 border-slate-200';
+            } else {
+                categoryLabel = '💡 その他';
+                categoryClass = 'bg-slate-100 text-ukcinder border-slate-200';
+            }
+
+            badgeCont.innerHTML = `
+                <span class="font-bold text-[10px] text-white bg-ukgold px-2 py-0.5 rounded-md font-mono">${escapeHtml(item.time)}</span>
+                <span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${escapeHtml(dateObj.short)} (${dateObj.day})</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${categoryClass}">${escapeHtml(categoryLabel)}</span>
+            `;
+
+            if (item.category === 'sightseeing') {
+                titleEl.textContent = item.spot;
+                bodyEl.innerHTML = `
+                    ${item.action ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ:</span> ${escapeHtml(item.action)}</div>` : ''}
+                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${escapeHtml(item.memo)}</div>` : ''}
+                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                        <span class="text-ukcinder/80 font-medium">予想予算:</span>
+                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                    </div>
+                    ${item.mapUrl ? `
+                        <a href="${escapeHtml(item.mapUrl)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-uknavy text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukcinder transition shadow-sm">
+                            <i class="fa-solid fa-map-location-dot"></i> Google Mapで開く
+                        </a>
+                    ` : ''}
+                `;
+            } else if (item.category === 'dining') {
+                titleEl.textContent = item.name;
+                bodyEl.innerHTML = `
+                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-amber-900">ジャンル:</span> ${escapeHtml(item.dineType || '食事')}</div>
+                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${escapeHtml(item.memo)}</div>` : ''}
+                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                        <span class="text-ukcinder/80 font-medium">予算目安:</span>
+                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                    </div>
+                    ${item.url ? `
+                        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-ukgold text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukred transition shadow-sm">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 予約・参考Webサイト
+                        </a>
+                    ` : ''}
+                `;
+            } else if (item.category === 'transport') {
+                titleEl.textContent = `${item.from} ➔ ${item.to}`;
+                bodyEl.innerHTML = `
+                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 space-y-1">
+                        <div><span class="font-bold text-ukcinder">移動手段:</span> ${escapeHtml(item.mode)} ${item.line ? `(${escapeHtml(item.line)} Line)` : ''} ${item.busNo ? `(系統: ${escapeHtml(item.busNo)})` : ''}</div>
+                        ${item.duration ? `<div><span class="font-bold text-ukcinder">所要時間:</span> 約 ${escapeHtml(item.duration)}</div>` : ''}
+                    </div>
+                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                        <span class="text-ukcinder/80 font-medium">運賃 / 費用:</span>
+                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                    </div>
+                `;
+            } else {
+                titleEl.textContent = item.title;
+                bodyEl.innerHTML = `
+                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${escapeHtml(item.memo)}</div>` : ''}
+                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                        <span class="text-ukcinder/80 font-medium">予想費用:</span>
+                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                    </div>
+                `;
+            }
+
+            footerEl.innerHTML = `
+                <button onclick="closeScheduleDetailModal()" class="flex-1 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition">
+                    閉じる
+                </button>
+                ${item.cost > 0 ? `
+                    <button onclick="recordScheduleToExpense('${item.id}', '${dateId}'); closeScheduleDetailModal();" class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow">
+                        支出に計上
+                    </button>
+                ` : ''}
+            `;
+
+            const modal = document.getElementById('scheduleDetailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeScheduleDetailModal() {
+            const modal = document.getElementById('scheduleDetailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function closeScheduleDetailModalOnBackdrop(e) {
+            if (e.target.id === 'scheduleDetailModal') {
+                closeScheduleDetailModal();
+            }
+        }
+
+        // ==========================================
+        // SECTION 2: BUDGET & EXPENSE
+        // ==========================================
+        function promptEditDailyTotalBudget() {
+            const isAll = appState.selectedDate === 'ALL';
+            const dateId = isAll ? TRIP_DATES[0].id : appState.selectedDate;
+            const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
+            const currentBudget = appState.dailyBudgets[dateId] ?? 100;
+
+            document.getElementById('budgetModalDateLabel').textContent = isAll
+                ? `全日程一括：1日あたりの予算上限 (£ GBP) ※8日間合計に反映されます`
+                : `${dateObj.jp} の予算上限 (£ GBP)`;
+            const input = document.getElementById('modalBudgetInput');
+            input.value = currentBudget;
+            document.getElementById('modalBudgetJpyPreview').textContent = isAll
+                ? `≈ ${formatJpy(currentBudget)} /日（8日間計: ${formatGbp(currentBudget * 8)} / ${formatJpy(currentBudget * 8)}）`
+                : `≈ ${formatJpy(currentBudget)} JPY`;
+
+            input.oninput = () => {
+                const v = parseFloat(input.value) || 0;
+                document.getElementById('modalBudgetJpyPreview').textContent = isAll
+                    ? `≈ ${formatJpy(v)} /日（8日間計: ${formatGbp(v * 8)} / ${formatJpy(v * 8)}）`
+                    : `≈ ${formatJpy(v)} JPY`;
+            };
+
+            const modal = document.getElementById('budgetModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeBudgetModal() {
+            const modal = document.getElementById('budgetModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveDailyTotalBudget() {
+            const val = parseFloat(document.getElementById('modalBudgetInput').value);
+            if (isNaN(val) || val < 0) {
+                showToast('0以上の有効な金額を入力してください', 'error');
+                return;
+            }
+            if (appState.selectedDate === 'ALL') {
+                TRIP_DATES.forEach(d => {
+                    appState.dailyBudgets[d.id] = val;
+                });
+                saveState();
+                closeBudgetModal();
+                renderBudget();
+                showToast(`全8日間の1日あたり予算を ${formatGbp(val)}（合計 ${formatGbp(val * 8)}）に更新しました`);
+            } else {
+                appState.dailyBudgets[appState.selectedDate] = val;
+                saveState();
+                closeBudgetModal();
+                renderBudget();
+                showToast('1日の目標予算を更新しました');
+            }
+        }
+
+        function updateExpenseJpyPreview() {
+            const val = parseFloat(document.getElementById('expAmount').value) || 0;
+            document.getElementById('expCalcJpy').textContent = `${formatJpy(val)} JPY`;
+        }
+
+        function handleAddExpense(e) {
+            e.preventDefault();
+            const title = document.getElementById('expTitle').value.trim();
+            const amount = parseFloat(document.getElementById('expAmount').value);
+            const category = document.getElementById('expCategory').value;
+
+            if (!title || isNaN(amount) || amount <= 0) {
+                showToast('品名と正しい金額を入力してください', 'error');
+                return;
+            }
+
+            const dateId = appState.selectedDate === 'ALL'
+                ? (document.getElementById('expTargetDate').value || TRIP_DATES[0].id)
+                : appState.selectedDate;
+
+            if (!appState.expenses[dateId]) {
+                appState.expenses[dateId] = [];
+            }
+            appState.expenses[dateId].push({
+                id: 'exp_' + Date.now(),
+                title,
+                category,
+                amount
+            });
+            saveState();
+
+            document.getElementById('addExpenseForm').reset();
+            updateExpenseJpyPreview();
+            renderBudget();
+            showToast('支出を記録しました');
+        }
+
+        function deleteExpenseItem(id, targetDateId = null) {
+            const dateId = targetDateId || appState.selectedDate;
+            if (!appState.expenses[dateId]) return;
+            appState.expenses[dateId] = appState.expenses[dateId].filter(e => e.id !== id);
+            saveState();
+            renderBudget();
+            showToast('支出記録を削除しました');
+        }
+
+        function renderBudget() {
+            const isAll = appState.selectedDate === 'ALL';
+            const dateId = appState.selectedDate;
+            const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
+
+            // Populate & toggle date selector inside expense form when in ALL view
+            const expDateContainer = document.getElementById('expenseDateSelectContainer');
+            const expTargetDateSelect = document.getElementById('expTargetDate');
+            if (isAll) {
+                expDateContainer.classList.remove('hidden');
+                expTargetDateSelect.innerHTML = TRIP_DATES.map((d, idx) =>
+                    `<option value="${d.id}">Day ${idx + 1} - ${d.jp}</option>`
+                ).join('');
+            } else {
+                expDateContainer.classList.add('hidden');
+            }
+
+            // Compute budget & expenses
+            let periodTotalBudget = 0;
+            let periodExpenses = [];
+
+            if (isAll) {
+                TRIP_DATES.forEach((d, idx) => {
+                    periodTotalBudget += Number(appState.dailyBudgets[d.id] ?? 100);
+                    const dayExps = appState.expenses[d.id] || [];
+                    dayExps.forEach(exp => {
+                        periodExpenses.push({
+                            ...exp,
+                            _dateId: d.id,
+                            _dayShort: `Day ${idx + 1}`
+                        });
+                    });
+                });
+            } else {
+                periodTotalBudget = Number(appState.dailyBudgets[dateId] ?? 100);
+                periodExpenses = (appState.expenses[dateId] || []).map(exp => ({
+                    ...exp,
+                    _dateId: dateId,
+                    _dayShort: `${dateObj.short}`
+                }));
+            }
+
+            const spentPeriod = periodExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            const remaining = periodTotalBudget - spentPeriod;
+            const remPercent = periodTotalBudget > 0
+                ? Math.max(0, Math.min(100, Math.round((remaining / periodTotalBudget) * 100)))
+                : 0;
+
+            document.getElementById('budgetDateHeading').textContent = isAll
+                ? '全体 (1〜8日目合計) 残り'
+                : `${dateObj.short} (${dateObj.day}) の残り`;
+            
+            const remGbpEl = document.getElementById('mainRemGbp');
+            remGbpEl.textContent = formatGbp(remaining);
+            remGbpEl.className = `text-4xl sm:text-5xl font-black tracking-tight ${remaining < 0 ? 'text-ukred' : 'text-slate-800'}`;
+            
+            document.getElementById('mainRemJpy').textContent = `(=${formatJpy(remaining)})`;
+            document.getElementById('mainTotalGbp').textContent = formatGbp(periodTotalBudget);
+            document.getElementById('mainTotalJpy').textContent = `(=${formatJpy(periodTotalBudget)})`;
+
+            // Update Donut/Progress Bar
+            const bar = document.getElementById('mainDonutBar');
+            bar.style.width = `${remPercent}%`;
+            if (remaining < 0) {
+                bar.className = 'bg-red-700 h-full transition-all duration-500 rounded-full';
+            } else if (remPercent < 25) {
+                bar.className = 'bg-ukgold h-full transition-all duration-500 rounded-full';
+            } else {
+                bar.className = 'bg-uknavy h-full transition-all duration-500 rounded-full';
+            }
+            document.getElementById('mainDonutPercent').textContent = `${remPercent}%`;
+
+            // Trip Overall Cumulative Spent
+            let tripTotalSpent = 0;
+            Object.values(appState.expenses).forEach(list => {
+                list.forEach(item => { tripTotalSpent += Number(item.amount || 0); });
+            });
+            document.getElementById('tripTotalSpentGbp').textContent = formatGbp(tripTotalSpent);
+            document.getElementById('tripTotalSpentJpy').textContent = formatJpy(tripTotalSpent);
+
+            // Sub Category Cards Grid
+            const catConfigs = [
+                { key: '食事', icon: '☕️', label: '食事' },
+                { key: 'ショッピング', icon: '🛍', label: '買い物' },
+                { key: '交通費', icon: '🚌', label: '交通費' },
+                { key: 'その他', icon: '💡', label: 'その他' }
+            ];
+
+            const catGrid = document.getElementById('categoryCardsGrid');
+            catGrid.innerHTML = catConfigs.map(cfg => {
+                const catSum = periodExpenses
+                    .filter(e => e.category === cfg.key)
+                    .reduce((s, e) => s + Number(e.amount || 0), 0);
+                const share = spentPeriod > 0 ? Math.round((catSum / spentPeriod) * 100) : 0;
+
+                return `
+                    <div class="bg-white rounded-xl p-3 border border-uksidewalk shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                <span>${cfg.icon}</span> ${cfg.label}
+                            </span>
+                            <span class="text-[10px] font-semibold text-slate-400">${share}%</span>
+                        </div>
+                        <div>
+                            <div class="text-base font-black text-ukcinder leading-tight">${formatGbp(catSum)}</div>
+                            <div class="text-[10px] text-slate-400 font-medium">${formatJpy(catSum)}</div>
+                        </div>
+                        <div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-2">
+                            <div class="bg-uknavy h-full rounded-full transition-all duration-500" style="width: ${share}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Expense Table
+            document.getElementById('expenseTableHeading').textContent = isAll ? '全日程の支出明細' : '本日の支出明細';
+            document.getElementById('expenseItemCount').textContent = `${periodExpenses.length} 件`;
+
+            const dateColHeader = document.getElementById('expenseDateColHeader');
+            if (isAll) {
+                dateColHeader.classList.remove('hidden');
+            } else {
+                dateColHeader.classList.add('hidden');
+            }
+
+            const tbody = document.getElementById('expenseTableBody');
+            const colSpanCount = isAll ? 5 : 4;
+
+            if (periodExpenses.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="${colSpanCount}" class="py-6 text-center text-xs text-slate-400">
+                            記録がありません
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = periodExpenses.map(exp => {
+                return `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        ${isAll ? `<td class="py-2.5 text-[11px] font-bold text-slate-500 whitespace-nowrap">${escapeHtml(exp._dayShort)}</td>` : ''}
+                        <td class="py-2.5 font-medium text-ukcinder text-xs">${escapeHtml(exp.title)}</td>
+                        <td class="py-2.5 text-right font-bold text-ukcinder text-xs">${formatGbp(exp.amount)}</td>
+                        <td class="py-2.5 text-right text-[11px] text-slate-400">${formatJpy(exp.amount)}</td>
+                        <td class="py-2.5 text-center">
+                            <button onclick="deleteExpenseItem('${exp.id}', '${exp._dateId}')" title="削除" class="text-slate-300 hover:text-uknavy p-1 transition">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // SECTION 3: CHECKLIST
+        // ==========================================
+        function handleAddChecklistItem(e) {
+            e.preventDefault();
+            const category = document.getElementById('checkCategory').value;
+            const text = document.getElementById('checkItemName').value.trim();
+            if (!text) return;
+
+            appState.checklist.push({
+                id: 'chk_' + Date.now(),
+                category,
+                text,
+                checked: false
+            });
+            saveState();
+
+            document.getElementById('checkItemName').value = '';
+            renderChecklist();
+            showToast('持ち物リストにアイテムを追加しました');
+        }
+
+        function toggleChecklistItem(id) {
+            const item = appState.checklist.find(c => c.id === id);
+            if (item) {
+                item.checked = !item.checked;
+                saveState();
+                renderChecklist();
+            }
+        }
+
+        function deleteChecklistItem(id) {
+            appState.checklist = appState.checklist.filter(c => c.id !== id);
+            saveState();
+            renderChecklist();
+            showToast('アイテムを削除しました');
+        }
+
+        function renderChecklist() {
+            const total = appState.checklist.length;
+            const checkedCount = appState.checklist.filter(c => c.checked).length;
+            const percent = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+
+            document.getElementById('checklistCountText').textContent = `${checkedCount}/${total}`;
+            document.getElementById('checklistPercentText').textContent = `${percent}%`;
+            document.getElementById('checklistProgressBar').style.width = `${percent}%`;
+
+            const categories = [
+                { name: '貴重品・書類', icon: '🛂' },
+                { name: '電子機器・通信', icon: '🔌' },
+                { name: '衣類・防寒具', icon: '🧥' },
+                { name: '日用品・常備薬', icon: '💊' }
+            ];
+
+            const grid = document.getElementById('checklistGrid');
+            grid.innerHTML = categories.map(cat => {
+                const items = appState.checklist.filter(c => c.category === cat.name);
+                const catDone = items.filter(c => c.checked).length;
+
+                return `
+                    <div class="bg-white rounded-2xl p-5 border border-uksidewalk shadow-sm flex flex-col">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                            <h3 class="font-bold text-ukcinder text-sm flex items-center gap-2">
+                                <span class="text-base">${cat.icon}</span> ${escapeHtml(cat.name)}
+                            </h3>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${catDone === items.length && items.length > 0 ? 'bg-amber-100 text-amber-900 border border-ukgold/40' : 'bg-slate-100 text-slate-600'}">
+                                ${catDone} / ${items.length}
+                            </span>
+                        </div>
+                        <div class="space-y-2 flex-1">
+                            ${items.length === 0 ? `<p class="text-xs text-slate-400 py-4 text-center">項目がありません</p>` : items.map(item => `
+                                <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border transition ${item.checked ? 'bg-amber-50/30 border-slate-100' : 'bg-white border-slate-200 hover:border-ukgold/60'}">
+                                    <label class="flex items-center gap-3 cursor-pointer flex-1 select-none">
+                                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleChecklistItem('${item.id}')" 
+                                               class="w-4 h-4 rounded text-uknavy focus:ring-ukgold border-slate-300 cursor-pointer">
+                                        <span class="text-sm transition ${item.checked ? 'line-through text-slate-400' : 'text-ukcinder font-medium'}">
+                                            ${escapeHtml(item.text)}
+                                        </span>
+                                    </label>
+                                    <button onclick="deleteChecklistItem('${item.id}')" title="削除" class="text-slate-300 hover:text-uknavy p-1 transition">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        function renderAll() {
+            document.getElementById('exchangeRateInput').value = appState.exchangeRate;
+            renderDateButtons();
+            renderItinerary();
+            renderBudget();
+            renderChecklist();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setFormCategory(appState.formCategory || 'sightseeing');
+            switchMainTab(appState.activeTab || 'itinerary');
+
+            // Offline status detection listener
+            function updateOnlineStatus() {
+                const badge = document.getElementById('offlineBadge');
+                if (!navigator.onLine) {
+                    badge.classList.remove('hidden');
+                    showToast('現在オフラインモードで動作中です (データは端末に保存されます)', 'warning');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+
+            // Register PWA Service Worker for Offline Capability
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'uk-trip-v1';
+                    self.addEventListener('install', (e) => {
+                        e.waitUntil(
+                            caches.open(CACHE_NAME).then((cache) => {
+                                return cache.addAll([
+                                    './',
+                                    'https://cdn.tailwindcss.com',
+                                    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+                                    'https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700;900&display=swap'
+                                ]).catch(() => {});
+                            })
+                        );
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(
+                            caches.match(e.request).then((res) => {
+                                return res || fetch(e.request).catch(() => caches.match('./'));
+                            })
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            }
+        });
+    </script>
+</body>
+</html>
