@@ -383,8 +383,11 @@
             <div class="bg-white rounded-3xl p-5 sm:p-6 border border-uksidewalk shadow-sm relative overflow-hidden">
                 <div class="flex flex-col items-center text-center gap-4">
                     
-                    <div class="flex items-center gap-1.5 text-ukcinder font-bold text-sm text-left w-full justify-start">
+                    <div class="flex items-center justify-between gap-1.5 text-ukcinder font-bold text-sm text-left w-full">
                         <span id="budgetDateHeading">12/01 の残りの予算</span>
+                        <button onclick="openBackupModal()" title="データのバックアップ・復元" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-uknavy px-2.5 py-1 rounded-xl font-semibold flex items-center gap-1 transition">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> データ管理
+                        </button>
                     </div>
                     
                     <!-- Main Grid: Left side amounts, Right side Donut Chart -->
@@ -544,6 +547,35 @@
 
     </main>
 
+    <!-- Data Backup / Restore Modal -->
+    <div id="backupModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target.id==='backupModal') closeBackupModal()">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-uksidewalk animate-fade-in space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-ukcinder text-base flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-uknavy"></i> データの保護・バックアップ
+                </h3>
+                <button onclick="closeBackupModal()" class="text-slate-400 hover:text-ukcinder p-1.5 rounded-full">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                iPhoneのホーム画面追加やブラウザ制限でデータが消えるのを防ぐため、自動保存に加えていつでもデータをコピー・復元できます。
+            </p>
+            <div class="space-y-3">
+                <button onclick="exportDataToClipboard()" class="w-full py-3 rounded-xl bg-uknavy text-white text-xs font-bold hover:bg-ukcinder transition flex items-center justify-center gap-2 shadow">
+                    <i class="fa-solid fa-copy"></i> 現在の全データをクリップボードにコピー
+                </button>
+                <div class="border-t border-slate-100 pt-3">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">バックアップデータから復元</label>
+                    <textarea id="importJsonArea" rows="3" placeholder="ここにコピーしたバックアップ文字列を貼り付けて「復元する」を押してください" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-uknavy"></textarea>
+                    <button onclick="importDataFromTextarea()" class="w-full mt-2 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition shadow">
+                        <i class="fa-solid fa-file-import mr-1"></i> 貼り付けたデータから復元する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="max-w-6xl mx-auto px-4 mt-8 text-center text-[10px] text-slate-400">
         <p>🇬🇧 UK Travel Companion — Have a wonderful journey!</p>
@@ -677,7 +709,7 @@
 
         window.appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
-                // Initialize Firebase and Cloud Sync (with localStorage fallback)
+        // Initialize Firebase and Cloud Sync
         async function initFirebase() {
             try {
                 if (typeof __firebase_config !== 'undefined' && __firebase_config) {
@@ -698,28 +730,89 @@
                     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-uk-trip';
                     const docRef = doc(window.db, 'artifacts', appId, 'users', window.userId, 'state', 'main');
 
-                    // Realtime sync listener
+                    // Realtime sync listener (Cloud takes precedence ONLY if it actually exists and has newer/valid data)
                     onSnapshot(docRef, (docSnap) => {
                         if (docSnap.exists()) {
                             const cloudData = docSnap.data();
-                            window.appState = { ...DEFAULT_STATE, ...cloudData };
-                            renderAll();
+                            const localSaved = getLocalStorageRaw();
+                            if (!localSaved || (cloudData._updatedAt && cloudData._updatedAt > (localSaved._updatedAt || 0))) {
+                                window.appState = { ...DEFAULT_STATE, ...cloudData };
+                                saveLocalStorageOnly();
+                                renderAll();
+                            }
                         } else {
-                            saveState();
+                            // First time setup in cloud: push current local/default state to cloud
+                            window.appState._updatedAt = Date.now();
+                            setDoc(docRef, window.appState).catch(() => {});
                         }
+                    }, (err) => {
+                        console.error('Firestore snapshot error:', err);
                     });
-                } else {
-                    // GitHub Pagesなどではスマホ内の保存データを読み込む
-                    loadLocalStorageState();
                 }
             } catch (e) {
                 console.warn('Firebase initialization fallback to localStorage:', e);
-                loadLocalStorageState();
             }
         }
 
+        function saveLocalStorageOnly() {
+            try {
+                const serialized = JSON.stringify(window.appState);
+                localStorage.setItem('uk_travel_companion_v1', serialized);
+                // Fallback cookie/IndexedDB mirror for iOS Standalone PWA resilience
+                saveToIndexedDB(window.appState);
+            } catch (err) {
+                console.error('localStorage save error:', err);
+            }
+        }
+
+        function getLocalStorageRaw() {
+            try {
+                const saved = localStorage.getItem('uk_travel_companion_v1');
+                return saved ? JSON.parse(saved) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // IndexedDB Mirror for iOS Home Screen Web App Persistence
+        function openTravelDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('UKTravelCompanionDB', 1);
+                req.onupgradeneeded = () => {
+                    if (!req.result.objectStoreNames.contains('stateStore')) {
+                        req.result.createObjectStore('stateStore');
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveToIndexedDB(stateObj) {
+            try {
+                const db = await openTravelDB();
+                const tx = db.transaction('stateStore', 'readwrite');
+                tx.objectStore('stateStore').put(JSON.parse(JSON.stringify(stateObj)), 'mainState');
+            } catch (e) {}
+        }
+
+        async function loadFromIndexedDB() {
+            try {
+                const db = await openTravelDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction('stateStore', 'readonly');
+                    const req = tx.objectStore('stateStore').get('mainState');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
 
         window.saveState = async function() {
+            window.appState._updatedAt = Date.now();
+            saveLocalStorageOnly();
             try {
                 if (window.isCloudSynced && window.db && window.userId) {
                     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-uk-trip';
@@ -727,21 +820,67 @@
                     await setDoc(docRef, window.appState);
                 }
             } catch (e) {
-                console.error('Cloud save failed, saving to localStorage:', e);
+                console.error('Cloud save failed:', e);
             }
-            try {
-                localStorage.setItem('uk_travel_companion_v1', JSON.stringify(window.appState));
-            } catch (err) {}
         };
 
-        function loadLocalStorageState() {
-            try {
-                const saved = localStorage.getItem('uk_travel_companion_v1');
-                if (saved) {
-                    window.appState = { ...DEFAULT_STATE, ...JSON.parse(saved) };
-                }
-            } catch (e) {}
+        async function loadAllSavedState() {
+            const localData = getLocalStorageRaw();
+            const idbData = await loadFromIndexedDB();
+            
+            let bestData = null;
+            if (localData && idbData) {
+                bestData = (idbData._updatedAt || 0) > (localData._updatedAt || 0) ? idbData : localData;
+            } else {
+                bestData = localData || idbData;
+            }
+
+            if (bestData) {
+                window.appState = { ...DEFAULT_STATE, ...bestData };
+            }
         }
+
+        window.openBackupModal = function() {
+            const modal = document.getElementById('backupModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeBackupModal = function() {
+            const modal = document.getElementById('backupModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.exportDataToClipboard = function() {
+            const jsonStr = JSON.stringify(window.appState);
+            const tempInput = document.createElement('textarea');
+            tempInput.value = jsonStr;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            window.showToast('全データをクリップボードにコピーしました！メモ帳等に貼り付けて保管できます');
+        };
+
+        window.importDataFromTextarea = function() {
+            const raw = document.getElementById('importJsonArea').value.trim();
+            if (!raw) {
+                window.showToast('復元データを貼り付けてください', 'error');
+                return;
+            }
+            try {
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') throw new Error('Invalid');
+                window.appState = { ...DEFAULT_STATE, ...parsed };
+                window.saveState();
+                window.renderAll();
+                window.closeBackupModal();
+                window.showToast('データを正常に復元しました！');
+            } catch (e) {
+                window.showToast('データ形式が正しくありません', 'error');
+            }
+        };
 
         window.formatGbp = function(val) {
             return '£' + Number(val || 0).toFixed(2);
@@ -801,10 +940,10 @@
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (t === tabName) {
-                    btn.className = 'flex flex-col items-center justify-center gap-1 text-white font-bold';
+                    btn.className = 'flex flex-col items-center justify-center gap-1 text-white font-bold py-1';
                     sec.classList.remove('hidden');
                 } else {
-                    btn.className = 'flex flex-col items-center justify-center gap-1 text-white/70 font-medium';
+                    btn.className = 'flex flex-col items-center justify-center gap-1 text-white/70 font-medium py-1';
                     sec.classList.add('hidden');
                 }
             });
@@ -878,10 +1017,10 @@
                 const btn = document.getElementById(`catBtn_${c}`);
                 const fields = document.getElementById(`formFields_${c}`);
                 if (c === cat) {
-                    btn.className = 'py-2 rounded-lg bg-white text-uknavy shadow transition';
+                    btn.className = 'py-2 rounded-lg bg-white text-uknavy shadow transition text-center';
                     fields.classList.remove('hidden');
                 } else {
-                    btn.className = 'py-2 rounded-lg text-slate-600 hover:bg-white/50 transition';
+                    btn.className = 'py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center';
                     fields.classList.add('hidden');
                 }
             });
@@ -1750,11 +1889,22 @@
             window.renderChecklist();
         };
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadAllSavedState();
             window.setFormCategory(window.appState.formCategory || 'sightseeing');
             window.switchMainTab(window.appState.activeTab || 'itinerary');
-            loadLocalStorageState();
+            window.renderAll();
             initFirebase();
+
+            // Force save when page goes into background or closes on iPhone PWA
+            window.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    saveLocalStorageOnly();
+                }
+            });
+            window.addEventListener('pagehide', () => {
+                saveLocalStorageOnly();
+            });
 
             function updateOnlineStatus() {
                 const badge = document.getElementById('offlineBadge');
