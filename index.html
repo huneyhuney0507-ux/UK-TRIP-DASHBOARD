@@ -229,7 +229,7 @@
     </div>
 
     <!-- Header Banner (Optimized for iPhone notch/safe-area) -->
-    <header class="bg-[#154673] text-white shadow-md sticky top-0 z-40 pt-12 sm:pt-14">
+    <header class="bg-[#154673] text-white shadow-md sticky top-0 z-40 pt-6 sm:pt-8">
         <div class="max-w-6xl mx-auto px-4 pb-7 sm:pb-8">
             <div class="flex items-center justify-between gap-2">
                 <div class="text-left">
@@ -1507,6 +1507,7 @@
             const customTextColor = item.textColor || '';
             const textStyle = customTextColor ? `color: ${customTextColor};` : '';
             const textColorClass = customTextColor ? '' : 'text-ukcinder';
+            const iconColorStyle = customTextColor ? `color: ${customTextColor}; opacity: 0.85;` : '';
 
             const dayTagHtml = dayPrefixLabel
                 ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dayPrefixLabel)}</span>`
@@ -1515,7 +1516,7 @@
             // Check if item has a valid link (mapUrl for sightseeing, url for dining)
             const itemLink = item.mapUrl || item.url || '';
             const linkButtonHtml = itemLink ? `
-                <a href="${window.escapeHtml(itemLink)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="リンクを開く" class="text-slate-400 hover:text-uknavy p-1 transition flex items-center justify-center text-xs">
+                <a href="${window.escapeHtml(itemLink)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="リンクを開く" class="text-slate-400 hover:opacity-100 p-1 transition flex items-center justify-center text-xs" style="${iconColorStyle}">
                     <i class="fa-solid fa-map-location-dot text-xs"></i>
                 </a>
             ` : '';
