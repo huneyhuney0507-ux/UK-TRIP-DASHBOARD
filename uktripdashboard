@@ -79,7 +79,7 @@
     <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-uksidewalk animate-fade-in">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-ukcinder text-base flex items-center gap-2">
+                <h3 class="font-bold text-ukcinder text-base flex items-center gap-2" id="budgetModalTitle">
                     <i class="fa-solid fa-coins text-ukgold"></i> 1日の目標予算を設定
                 </h3>
                 <button onclick="closeBudgetModal()" class="text-slate-400 hover:text-ukcinder p-2 rounded-full">
@@ -89,15 +89,15 @@
             <p class="text-xs text-slate-500 mb-4" id="budgetModalDateLabel">12月1日 (火) の予算上限 (£ GBP)</p>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">予算額 (£ GBP)</label>
-                    <input type="number" id="modalBudgetInput" step="1" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xl font-bold text-ukcinder focus:outline-none focus:border-uknavy">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" id="modalInputLabel">予算額 (£ GBP)</label>
+                    <input type="number" id="modalBudgetInput" step="1" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xl font-bold text-ukcinder focus:outline-none focus:border-uknavy">
                     <p class="text-xs text-slate-400 mt-1 text-right" id="modalBudgetJpyPreview">≈ ¥21,082 JPY</p>
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeBudgetModal()" class="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
                         キャンセル
                     </button>
-                    <button type="button" onclick="saveDailyTotalBudget()" class="flex-1 py-3 rounded-xl bg-uknavy text-white text-sm font-semibold hover:bg-ukcinder transition shadow">
+                    <button type="button" onclick="saveBudgetFromModal()" class="flex-1 py-3 rounded-xl bg-uknavy text-white text-sm font-semibold hover:bg-ukcinder transition shadow">
                         保存する
                     </button>
                 </div>
@@ -134,8 +134,8 @@
     </div>
 
     <!-- Header Banner (Optimized for iPhone notch/safe-area) -->
-    <header class="bg-[#154673] text-white shadow-md sticky top-0 z-40 pt-safe">
-        <div class="max-w-6xl mx-auto px-4 py-3.5 sm:py-5">
+    <header class="bg-[#154673] text-white shadow-md sticky top-0 z-40 pt-12 sm:pt-14">
+        <div class="max-w-6xl mx-auto px-4 pb-7 sm:pb-8">
             <div class="flex items-center justify-between gap-2">
                 <div class="text-left">
                     <div class="flex items-center gap-2">
@@ -166,16 +166,16 @@
 
     <!-- Bottom Navigation Bar for Mobile (iPhone Thumb-friendly) -->
     <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto sm:max-w-6xl bg-[#c2352f]/95 backdrop-blur-md border-t border-red-800 z-40 pb-safe">
-        <div class="grid grid-cols-3 h-16">
-            <button id="tabItineraryBtn" onclick="switchMainTab('itinerary')" class="flex flex-col items-center justify-center gap-1 text-white font-bold">
+        <div class="grid grid-cols-3 h-20 pt-1.5 pb-4">
+            <button id="tabItineraryBtn" onclick="switchMainTab('itinerary')" class="flex flex-col items-center justify-center gap-1 text-white font-bold py-1">
                 <i class="fa-regular fa-calendar-days text-lg"></i>
                 <span class="text-[10px]">SCHEDULE</span>
             </button>
-            <button id="tabBudgetBtn" onclick="switchMainTab('budget')" class="flex flex-col items-center justify-center gap-1 text-white/70 font-medium">
+            <button id="tabBudgetBtn" onclick="switchMainTab('budget')" class="flex flex-col items-center justify-center gap-1 text-white/70 font-medium py-1">
                 <i class="fa-solid fa-wallet text-lg"></i>
                 <span class="text-[10px]">BUDGET</span>
             </button>
-            <button id="tabChecklistBtn" onclick="switchMainTab('checklist')" class="flex flex-col items-center justify-center gap-1 text-white/70 font-medium">
+            <button id="tabChecklistBtn" onclick="switchMainTab('checklist')" class="flex flex-col items-center justify-center gap-1 text-white/70 font-medium py-1">
                 <i class="fa-solid fa-list-check text-lg"></i>
                 <span class="text-[10px]">PACK LIST</span>
             </button>
@@ -383,52 +383,46 @@
             <div class="bg-white rounded-3xl p-5 sm:p-6 border border-uksidewalk shadow-sm relative overflow-hidden">
                 <div class="flex flex-col items-center text-center gap-4">
                     
-                    <div class="flex items-center gap-1.5 text-slate-500 font-bold text-sm">
-                        <i class="fa-solid fa-wallet text-ukgold"></i>
+                    <div class="flex items-center gap-1.5 text-ukcinder font-bold text-sm text-left w-full justify-start">
                         <span id="budgetDateHeading">12/01 の残りの予算</span>
                     </div>
                     
-                    <!-- Remaining Big Text & Slash Total Budget -->
-                    <div class="space-y-1">
-                        <div class="flex items-baseline justify-center gap-1.5">
-                            <span class="text-4xl sm:text-5xl font-black text-ukcinder tracking-tight" id="mainRemGbp">£100.00</span>
-                            <span class="text-slate-500 font-semibold text-sm" id="mainRemJpy">(=¥21,082)</span>
+                    <!-- Main Grid: Left side amounts, Right side Donut Chart -->
+                    <div class="w-full flex items-center justify-between gap-4 py-2">
+                        <div class="text-left space-y-1.5">
+                            <div class="flex items-baseline gap-1.5 flex-wrap">
+                                <span class="text-3xl sm:text-4xl font-black text-ukcinder tracking-tight" id="mainRemGbp">£100.00</span>
+                                <span class="text-slate-500 font-semibold text-xs sm:text-sm" id="mainRemJpy">(=¥21,082)</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-1.5 text-slate-500 font-semibold text-xs pt-1">
+                                <span>/</span>
+                                <span id="mainTotalGbp" class="font-bold text-ukcinder">£100.00</span>
+                                <span class="text-xs text-slate-400" id="mainTotalJpy">(=¥21,082)</span>
+                                <button onclick="promptEditDailyTotalBudget()" class="ml-1 text-xs text-uknavy hover:bg-amber-50 px-2 py-1 rounded-lg border border-ukgold/40 transition font-semibold">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div class="flex items-center justify-center gap-1.5 text-slate-500 font-semibold text-sm pt-1">
-                            <span>上限:</span>
-                            <span id="mainTotalGbp" class="font-bold text-ukcinder">£100.00</span>
-                            <span class="text-xs text-slate-400" id="mainTotalJpy">(=¥21,082)</span>
-                            <button onclick="promptEditDailyTotalBudget()" class="ml-1 text-xs text-uknavy hover:bg-amber-50 px-2 py-1 rounded-lg border border-ukgold/40 transition font-semibold">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- Donut Progress Line (Mobile Friendly alternative to large circle) -->
-                    <div class="w-full max-w-xs space-y-1.5 pt-1">
-                        <div class="flex justify-between text-xs font-bold px-1">
-                            <span class="text-slate-400 uppercase tracking-wider">REMAINING</span>
-                            <span id="mainDonutPercent" class="text-uknavy font-extrabold">100%</span>
+                        <!-- Circular SVG Donut Chart -->
+                        <div class="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 flex items-center justify-center">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="mainDonutCircle" class="text-uknavy transition-all duration-500" stroke-dasharray="100, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <span id="mainDonutPercent" class="text-xs sm:text-sm font-black text-ukcinder">100%</span>
+                            </div>
                         </div>
-                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                            <div id="mainDonutBar" class="bg-uknavy h-full transition-all duration-500 rounded-full" style="width: 100%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Cumulative Total -->
-                    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] text-slate-600">
-                        <span>8日間累計支出: <strong class="text-ukcinder" id="tripTotalSpentGbp">£0.00</strong></span>
-                        <span class="text-slate-300">|</span>
-                        <span id="tripTotalSpentJpy">¥0</span>
                     </div>
 
                 </div>
             </div>
 
-            <!-- Sub Category Cards Grid (2x2 on Mobile) -->
-            <div class="grid grid-cols-2 gap-2.5" id="categoryCardsGrid">
-                <!-- Dining, Shopping, Transport, Other Cards dynamically generated -->
+            <!-- Sub Category Cards Grid (2 columns on mobile, 4 on lg) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3" id="categoryCardsGrid">
+                <!-- Category Cards dynamically generated -->
             </div>
 
             <!-- Expense Entry & Log Section -->
@@ -555,10 +549,19 @@
         <p>🇬🇧 UK Travel Companion — Have a wonderful journey!</p>
     </footer>
 
-    <script>
-        // ==========================================
-        // STATE & INITIAL DATA (Persisted in LocalStorage)
-        // ==========================================
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase handles
+        window.app = null;
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        window.isCloudSynced = false;
+
         const TRIP_DATES = [
             { id: '2026-12-01', short: '12/01', day: 'Tue', jp: '12月1日 (火)', tip: 'ロンドン到着日はコンタクトレス決済対応カードやオイスターカードの準備、時差ボケ対策を優先しましょう。' },
             { id: '2026-12-02', short: '12/02', day: 'Wed', jp: '12月2日 (水)', tip: 'ウェストミンスター周辺やバッキンガム宮殿の衛兵交代式（11:00頃開始）は早めの場所取りがおすすめです。' },
@@ -569,8 +572,6 @@
             { id: '2026-12-07', short: '12/07', day: 'Mon', jp: '12月7日 (月)', tip: '12月のロンドンは16時頃から暗くなり始めます。オックスフォード・ストリートやリージェント・ストリートのクリスマスイルミネーションが必見です！' },
             { id: '2026-12-08', short: '12/08', day: 'Tue', jp: '12月8日 (火)', tip: '帰国日はヒースロー空港へ余裕を持って出発しましょう（出発3時間前到着が目安）。' }
         ];
-
-        const STORAGE_KEY = 'uk_travel_companion_v1';
 
         const DEFAULT_STATE = {
             exchangeRate: 210.82,
@@ -586,6 +587,16 @@
                 '2026-12-06': 100,
                 '2026-12-07': 150,
                 '2026-12-08': 80
+            },
+            dailySubBudgets: {
+                '2026-12-01': { '食事': 50, 'ショッピング': 30, '交通費': 25, 'その他': 15 },
+                '2026-12-02': { '食事': 40, 'ショッピング': 30, '交通費': 20, 'その他': 10 },
+                '2026-12-03': { '食事': 40, 'ショッピング': 30, '交通費': 20, 'その他': 10 },
+                '2026-12-04': { '食事': 50, 'ショッピング': 30, '交通費': 25, 'その他': 15 },
+                '2026-12-05': { '食事': 60, 'ショッピング': 40, '交通費': 30, 'その他': 20 },
+                '2026-12-06': { '食事': 40, 'ショッピング': 30, '交通費': 20, 'その他': 10 },
+                '2026-12-07': { '食事': 60, 'ショッピング': 40, '交通費': 30, 'その他': 20 },
+                '2026-12-08': { '食事': 30, 'ショッピング': 20, '交通費': 20, 'その他': 10 }
             },
             schedules: {
                 '2026-12-01': [
@@ -645,7 +656,7 @@
             expenses: {
                 '2026-12-01': [
                     { id: 'e1', title: 'ヒースロー〜市内 鉄道運賃', category: '交通費', amount: 12.80 },
-                    { id: 'e2', title: 'パブ夕食 (フィッシュ&チップス)', category: '食事', amount: 28.50 }
+                    { id: 'e2', title: 'パブ夕食 (フィッシュ&チップs)', category: '食事', amount: 28.50 }
                 ]
             },
             checklist: [
@@ -664,42 +675,83 @@
             ]
         };
 
-        let appState = loadState();
+        window.appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
-        function loadState() {
+        // Initialize Firebase and Cloud Sync
+        async function initFirebase() {
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    return { ...DEFAULT_STATE, ...parsed };
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    window.app = initializeApp(firebaseConfig);
+                    window.db = getFirestore(window.app);
+                    window.auth = getAuth(window.app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(window.auth);
+                    }
+
+                    window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
+                    window.isCloudSynced = true;
+                    
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-uk-trip';
+                    const docRef = doc(window.db, 'artifacts', appId, 'users', window.userId, 'state', 'main');
+
+                    // Realtime sync listener
+                    onSnapshot(docRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const cloudData = docSnap.data();
+                            window.appState = { ...DEFAULT_STATE, ...cloudData };
+                            renderAll();
+                        } else {
+                            // First time setup in cloud, save default
+                            setDoc(docRef, DEFAULT_STATE).catch(() => {});
+                        }
+                    }, (err) => {
+                        console.error('Firestore snapshot error:', err);
+                    });
                 }
             } catch (e) {
-                console.error('Failed to load state:', e);
+                console.warn('Firebase initialization fallback to localStorage:', e);
+                loadLocalStorageState();
             }
-            return JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
 
-        function saveState() {
+        window.saveState = async function() {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                if (window.isCloudSynced && window.db && window.userId) {
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-uk-trip';
+                    const docRef = doc(window.db, 'artifacts', appId, 'users', window.userId, 'state', 'main');
+                    await setDoc(docRef, window.appState);
+                }
             } catch (e) {
-                console.error('Failed to save state:', e);
+                console.error('Cloud save failed, saving to localStorage:', e);
             }
+            try {
+                localStorage.setItem('uk_travel_companion_v1', JSON.stringify(window.appState));
+            } catch (err) {}
+        };
+
+        function loadLocalStorageState() {
+            try {
+                const saved = localStorage.getItem('uk_travel_companion_v1');
+                if (saved) {
+                    window.appState = { ...DEFAULT_STATE, ...JSON.parse(saved) };
+                }
+            } catch (e) {}
         }
 
-        // ==========================================
-        // UTILITY & FORMATTING
-        // ==========================================
-        function formatGbp(val) {
+        window.formatGbp = function(val) {
             return '£' + Number(val || 0).toFixed(2);
-        }
+        };
 
-        function formatJpy(gbpVal) {
-            const jpy = Math.round(Number(gbpVal || 0) * appState.exchangeRate);
+        window.formatJpy = function(gbpVal) {
+            const jpy = Math.round(Number(gbpVal || 0) * window.appState.exchangeRate);
             return '¥' + jpy.toLocaleString('ja-JP');
-        }
+        };
 
-        function showToast(message, type = 'success') {
+        window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             const bgClass = type === 'error' ? 'bg-red-700' : 'bg-uknavy';
@@ -712,9 +764,9 @@
                 toast.style.transition = 'opacity 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 2600);
-        }
+        };
 
-        function escapeHtml(str) {
+        window.escapeHtml = function(str) {
             if (!str) return '';
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -722,29 +774,26 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
-        }
+        };
 
-        // ==========================================
-        // NAVIGATION & HEADER CONTROLS
-        // ==========================================
-        function updateExchangeRate() {
+        window.updateExchangeRate = function() {
             const input = document.getElementById('exchangeRateInput');
             const rate = parseFloat(input.value);
             if (isNaN(rate) || rate <= 0) {
-                showToast('有効な為替レートを入力してください', 'error');
+                window.showToast('有効な為替レートを入力してください', 'error');
                 return;
             }
-            appState.exchangeRate = rate;
-            saveState();
-            updateSchedCostPreview();
-            updateExpenseJpyPreview();
-            renderAll();
-            showToast(`為替レートを 1 GBP = ¥${rate.toFixed(2)} に更新しました`);
-        }
+            window.appState.exchangeRate = rate;
+            window.saveState();
+            window.updateSchedCostPreview();
+            window.updateExpenseJpyPreview();
+            window.renderAll();
+            window.showToast(`為替レートを 1 GBP = ¥${rate.toFixed(2)} に更新しました`);
+        };
 
-        function switchMainTab(tabName) {
-            appState.activeTab = tabName;
-            saveState();
+        window.switchMainTab = function(tabName) {
+            window.appState.activeTab = tabName;
+            window.saveState();
 
             const tabs = ['itinerary', 'budget', 'checklist'];
             tabs.forEach(t => {
@@ -759,7 +808,6 @@
                 }
             });
 
-            // Hide date selector on checklist tab
             const dateBar = document.getElementById('dateSelectorBar');
             if (tabName === 'checklist') {
                 dateBar.classList.add('hidden');
@@ -767,25 +815,25 @@
                 dateBar.classList.remove('hidden');
             }
 
-            renderAll();
-        }
+            window.renderAll();
+        };
 
-        function selectDate(dateId) {
-            appState.selectedDate = dateId;
-            saveState();
-            renderAll();
-        }
+        window.selectDate = function(dateId) {
+            window.appState.selectedDate = dateId;
+            window.saveState();
+            window.renderAll();
+        };
 
-        function renderDateButtons() {
+        window.renderDateButtons = function() {
             const container = document.getElementById('dateButtonsContainer');
-            const isAllSelected = appState.selectedDate === 'ALL';
-            const currentObj = TRIP_DATES.find(d => d.id === appState.selectedDate) || TRIP_DATES[0];
+            const isAllSelected = window.appState.selectedDate === 'ALL';
+            const currentObj = TRIP_DATES.find(d => d.id === window.appState.selectedDate) || TRIP_DATES[0];
             
             document.getElementById('currentSelectedDateLabel').textContent = isAllSelected
                 ? '全体 (12/01 - 12/08)'
                 : `${currentObj.short} (${currentObj.day})`;
 
-            const totalSchedCount = TRIP_DATES.reduce((sum, d) => sum + (appState.schedules[d.id] || []).length, 0);
+            const totalSchedCount = TRIP_DATES.reduce((sum, d) => sum + (window.appState.schedules[d.id] || []).length, 0);
 
             const allBtnHtml = `
                 <button onclick="selectDate('ALL')" 
@@ -802,8 +850,8 @@
             `;
 
             const dayBtnsHtml = TRIP_DATES.map((d, idx) => {
-                const isSelected = d.id === appState.selectedDate;
-                const schedCount = (appState.schedules[d.id] || []).length;
+                const isSelected = d.id === window.appState.selectedDate;
+                const schedCount = (window.appState.schedules[d.id] || []).length;
                 return `
                     <button onclick="selectDate('${d.id}')" 
                             class="flex flex-col items-center justify-center py-2 px-3 rounded-xl border text-center transition shrink-0 snap-align-start relative min-w-[58px] ${
@@ -820,13 +868,10 @@
             }).join('');
 
             container.innerHTML = allBtnHtml + dayBtnsHtml;
-        }
+        };
 
-        // ==========================================
-        // SECTION 1: ITINERARY & SCHEDULE
-        // ==========================================
-        function setFormCategory(cat) {
-            appState.formCategory = cat;
+        window.setFormCategory = function(cat) {
+            window.appState.formCategory = cat;
             const categories = ['sightseeing', 'dining', 'transport', 'other'];
             categories.forEach(c => {
                 const btn = document.getElementById(`catBtn_${c}`);
@@ -840,17 +885,16 @@
                 }
             });
 
-            // Hide shared estimated cost if transport (transport has its own fare input)
             const estContainer = document.getElementById('estimatedCostContainer');
             if (cat === 'transport') {
                 estContainer.classList.add('hidden');
-                toggleTransportLineOptions();
+                window.toggleTransportLineOptions();
             } else {
                 estContainer.classList.remove('hidden');
             }
-        }
+        };
 
-        function toggleTransportLineOptions() {
+        window.toggleTransportLineOptions = function() {
             const mode = document.getElementById('transMode').value;
             const lineCont = document.getElementById('undergroundLineContainer');
             const busCont = document.getElementById('busDetailContainer');
@@ -865,21 +909,19 @@
                 lineCont.classList.add('hidden');
                 busCont.classList.add('hidden');
             }
-        }
+        };
 
-        function updateSchedCostPreview() {
+        window.updateSchedCostPreview = function() {
             const val = parseFloat(document.getElementById('schedCost').value) || 0;
-            document.getElementById('schedCostJpyPreview').textContent = `≈ ${formatJpy(val)}`;
-        }
+            document.getElementById('schedCostJpyPreview').textContent = `≈ ${window.formatJpy(val)}`;
+        };
 
-        function updateTransportCostPreview() {
-            // Optional hook if needed
-        }
+        window.updateTransportCostPreview = function() {};
 
-        function handleAddSchedule(e) {
+        window.handleAddSchedule = function(e) {
             e.preventDefault();
-            const dateId = appState.selectedDate === 'ALL' ? TRIP_DATES[0].id : appState.selectedDate;
-            const cat = appState.formCategory;
+            const dateId = window.appState.selectedDate === 'ALL' ? TRIP_DATES[0].id : window.appState.selectedDate;
+            const cat = window.appState.formCategory;
             const time = document.getElementById('schedTime').value || '12:00';
             let newItem = {
                 id: 'sched_' + Date.now(),
@@ -890,7 +932,7 @@
 
             if (cat === 'sightseeing') {
                 const spot = document.getElementById('sightSpot').value.trim();
-                if (!spot) { showToast('スポット名を入力してください', 'error'); return; }
+                if (!spot) { window.showToast('スポット名を入力してください', 'error'); return; }
                 newItem.spot = spot;
                 newItem.action = document.getElementById('sightAction').value.trim();
                 newItem.memo = document.getElementById('sightMemo').value.trim();
@@ -898,7 +940,7 @@
                 newItem.cost = parseFloat(document.getElementById('schedCost').value) || 0;
             } else if (cat === 'dining') {
                 const name = document.getElementById('dineName').value.trim();
-                if (!name) { showToast('店名を入力してください', 'error'); return; }
+                if (!name) { window.showToast('店名を入力してください', 'error'); return; }
                 newItem.dineType = document.getElementById('dineType').value;
                 newItem.name = name;
                 newItem.memo = document.getElementById('dineMemo').value.trim();
@@ -907,7 +949,7 @@
             } else if (cat === 'transport') {
                 const from = document.getElementById('transFrom').value.trim();
                 const to = document.getElementById('transTo').value.trim();
-                if (!from || !to) { showToast('出発地と目的地を入力してください', 'error'); return; }
+                if (!from || !to) { window.showToast('出発地と目的地を入力してください', 'error'); return; }
                 newItem.mode = document.getElementById('transMode').value;
                 newItem.line = document.getElementById('transLine').value;
                 newItem.busNo = document.getElementById('transBusNo').value.trim();
@@ -917,40 +959,39 @@
                 newItem.cost = parseFloat(document.getElementById('transFare').value) || 0;
             } else if (cat === 'other') {
                 const title = document.getElementById('otherTitle').value.trim();
-                if (!title) { showToast('件名・タイトルを入力してください', 'error'); return; }
+                if (!title) { window.showToast('件名・タイトルを入力してください', 'error'); return; }
                 newItem.title = title;
                 newItem.memo = document.getElementById('otherMemo').value.trim();
                 newItem.cost = parseFloat(document.getElementById('schedCost').value) || 0;
             }
 
-            if (!appState.schedules[dateId]) {
-                appState.schedules[dateId] = [];
+            if (!window.appState.schedules[dateId]) {
+                window.appState.schedules[dateId] = [];
             }
-            appState.schedules[dateId].push(newItem);
-            saveState();
+            window.appState.schedules[dateId].push(newItem);
+            window.saveState();
 
-            // Reset text fields
             document.getElementById('addScheduleForm').reset();
             document.getElementById('schedTime').value = time;
-            setFormCategory(cat);
-            updateSchedCostPreview();
+            window.setFormCategory(cat);
+            window.updateSchedCostPreview();
 
-            renderAll();
-            showToast(appState.selectedDate === 'ALL' ? 'Day 1 (12/01) の旅程に予定を追加しました' : '旅程に新しい予定を追加しました');
-        }
+            window.renderAll();
+            window.showToast('旅程に新しい予定を追加しました');
+        };
 
-        function deleteScheduleItem(id, targetDateId = null) {
-            const dateId = targetDateId || appState.selectedDate;
-            if (!appState.schedules[dateId]) return;
-            appState.schedules[dateId] = appState.schedules[dateId].filter(item => item.id !== id);
-            saveState();
-            renderAll();
-            showToast('予定を削除しました');
-        }
+        window.deleteScheduleItem = function(id, targetDateId = null) {
+            const dateId = targetDateId || window.appState.selectedDate;
+            if (!window.appState.schedules[dateId]) return;
+            window.appState.schedules[dateId] = window.appState.schedules[dateId].filter(item => item.id !== id);
+            window.saveState();
+            window.renderAll();
+            window.showToast('予定を削除しました');
+        };
 
-        function recordScheduleToExpense(id, targetDateId = null) {
-            const dateId = targetDateId || appState.selectedDate;
-            const item = (appState.schedules[dateId] || []).find(s => s.id === id);
+        window.recordScheduleToExpense = function(id, targetDateId = null) {
+            const dateId = targetDateId || window.appState.selectedDate;
+            const item = (window.appState.schedules[dateId] || []).find(s => s.id === id);
             if (!item || !item.cost || item.cost <= 0) return;
 
             let title = '';
@@ -969,19 +1010,19 @@
                 expCat = 'その他';
             }
 
-            if (!appState.expenses[dateId]) appState.expenses[dateId] = [];
-            appState.expenses[dateId].push({
+            if (!window.appState.expenses[dateId]) window.appState.expenses[dateId] = [];
+            window.appState.expenses[dateId].push({
                 id: 'exp_' + Date.now(),
                 title: title,
                 category: expCat,
                 amount: Number(item.cost)
             });
-            saveState();
-            renderAll();
-            showToast(`「${title}」(${formatGbp(item.cost)}) を家計簿に計上しました`);
-        }
+            window.saveState();
+            window.renderAll();
+            window.showToast(`「${title}」(${window.formatGbp(item.cost)}) を家計簿に計上しました`);
+        };
 
-        function getTubeLineBadgeColor(line) {
+        window.getTubeLineBadgeColor = function(line) {
             const map = {
                 'Piccadilly': 'bg-[#003688] text-white',
                 'Bakerloo': 'bg-[#B36305] text-white',
@@ -995,16 +1036,16 @@
                 'Metropolitan': 'bg-[#9B0056] text-white'
             };
             return map[line] || 'bg-ukblue text-white';
-        }
+        };
 
-        function renderItinerary() {
-            const isAll = appState.selectedDate === 'ALL';
+        window.renderItinerary = function() {
+            const isAll = window.appState.selectedDate === 'ALL';
             const timeline = document.getElementById('scheduleTimeline');
 
             if (isAll) {
                 let allItems = [];
                 TRIP_DATES.forEach((d, idx) => {
-                    const dayList = [...(appState.schedules[d.id] || [])].sort((a, b) => a.time.localeCompare(b.time));
+                    const dayList = [...(window.appState.schedules[d.id] || [])].sort((a, b) => a.time.localeCompare(b.time));
                     dayList.forEach(item => {
                         allItems.push({ ...item, _dateId: d.id, _dayLabel: `Day ${idx + 1} (${d.short})` });
                     });
@@ -1012,7 +1053,7 @@
 
                 document.getElementById('scheduleCountBadge').textContent = `${allItems.length} 件`;
                 const estTotal = allItems.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
-                document.getElementById('dailyEstimatedSum').textContent = `8日間予定予算計: ${formatGbp(estTotal)} (${formatJpy(estTotal)})`;
+                document.getElementById('dailyEstimatedSum').textContent = `8日間予定予算計: ${window.formatGbp(estTotal)} (${window.formatJpy(estTotal)})`;
 
                 if (allItems.length === 0) {
                     timeline.innerHTML = `
@@ -1026,16 +1067,16 @@
                     return;
                 }
 
-                timeline.innerHTML = allItems.map(item => buildTimelineItemHtml(item, item._dateId, item._dayLabel)).join('');
+                timeline.innerHTML = allItems.map(item => window.buildTimelineItemHtml(item, item._dateId, item._dayLabel)).join('');
                 return;
             }
 
-            const dateId = appState.selectedDate;
-            const items = [...(appState.schedules[dateId] || [])].sort((a, b) => a.time.localeCompare(b.time));
+            const dateId = window.appState.selectedDate;
+            const items = [...(window.appState.schedules[dateId] || [])].sort((a, b) => a.time.localeCompare(b.time));
             document.getElementById('scheduleCountBadge').textContent = `${items.length} 件`;
 
             const estTotal = items.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
-            document.getElementById('dailyEstimatedSum').textContent = `予定予算計: ${formatGbp(estTotal)} (${formatJpy(estTotal)})`;
+            document.getElementById('dailyEstimatedSum').textContent = `予定予算計: ${window.formatGbp(estTotal)} (${window.formatJpy(estTotal)})`;
 
             if (items.length === 0) {
                 timeline.innerHTML = `
@@ -1044,16 +1085,15 @@
                             <i class="fa-regular fa-calendar-plus"></i>
                         </div>
                         <p class="text-sm font-semibold text-slate-500">この日の予定はまだ登録されていません</p>
-                        <p class="text-xs text-slate-400 mt-1">下のフォームから観光スポットや食事・移動を追加しましょう</p>
                     </div>
                 `;
                 return;
             }
 
-            timeline.innerHTML = items.map(item => buildTimelineItemHtml(item, dateId, null)).join('');
-        }
+            timeline.innerHTML = items.map(item => window.buildTimelineItemHtml(item, dateId, null)).join('');
+        };
 
-        function buildTimelineItemHtml(item, dateId, dayPrefixLabel) {
+        window.buildTimelineItemHtml = function(item, dateId, dayPrefixLabel) {
             let badgeHtml = '';
             let dotColor = 'bg-uknavy';
             let titleHtml = '';
@@ -1062,45 +1102,43 @@
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-uknavy';
                 badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 観光</span>`;
-                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${escapeHtml(item.spot)}</h4>`;
+                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
-                    ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.action)}</p>` : ''}
-                    ${item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.memo)}</p>` : ''}
+                    ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.action)}</p>` : ''}
+                    ${item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : ''}
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">${escapeHtml(item.dineType || '☕️ 食事')}</span>`;
-                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${escapeHtml(item.name)}</h4>`;
-                detailsHtml = `
-                    ${item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.memo)}</p>` : ''}
-                `;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">${window.escapeHtml(item.dineType || '☕️ 食事')}</span>`;
+                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.name)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             } else if (item.category === 'transport') {
                 dotColor = 'bg-slate-700';
-                let modeBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">🚌 ${escapeHtml(item.mode)}</span>`;
+                let modeBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">🚌 ${window.escapeHtml(item.mode)}</span>`;
                 if (item.mode === 'Underground' && item.line) {
-                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${getTubeLineBadgeColor(item.line)}">${escapeHtml(item.line)} Line</span>`;
+                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${window.getTubeLineBadgeColor(item.line)}">${window.escapeHtml(item.line)} Line</span>`;
                 } else if (item.mode === 'Bus' && item.busNo) {
-                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-uknavy text-white">No. ${escapeHtml(item.busNo)}</span>`;
+                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-uknavy text-white">No. ${window.escapeHtml(item.busNo)}</span>`;
                 }
                 badgeHtml = modeBadge;
                 titleHtml = `
                     <h4 class="font-bold text-ukcinder text-xs sm:text-sm flex items-center gap-1.5 flex-wrap">
-                        <span>${escapeHtml(item.from)}</span>
+                        <span>${window.escapeHtml(item.from)}</span>
                         <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
-                        <span>${escapeHtml(item.to)}</span>
+                        <span>${window.escapeHtml(item.to)}</span>
                     </h4>
                 `;
-                detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-regular fa-hourglass-half mr-1"></i>${escapeHtml(item.duration)}</p>` : '';
+                detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
             } else {
                 dotColor = 'bg-uksidewalk';
                 badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 その他</span>`;
-                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${escapeHtml(item.title)}</h4>`;
-                detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${escapeHtml(item.memo)}</p>` : '';
+                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.title)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             }
 
             const hasCost = Number(item.cost) > 0;
             const dayTagHtml = dayPrefixLabel
-                ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${escapeHtml(dayPrefixLabel)}</span>`
+                ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dayPrefixLabel)}</span>`
                 : '';
 
             return `
@@ -1110,13 +1148,13 @@
                         <div class="flex flex-wrap justify-between items-start gap-1 mb-1">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 ${dayTagHtml}
-                                <span class="font-mono font-bold text-xs text-white bg-ukgold px-2 py-0.5 rounded-md">${escapeHtml(item.time)}</span>
+                                <span class="font-mono font-bold text-xs text-white bg-ukgold px-2 py-0.5 rounded-md">${window.escapeHtml(item.time)}</span>
                                 ${badgeHtml}
                             </div>
                             <div class="flex items-center gap-1" onclick="event.stopPropagation()">
                                 ${hasCost ? `
                                     <span class="text-[11px] font-bold text-ukcinder bg-amber-50 border border-ukgold/40 px-1.5 py-0.5 rounded">
-                                        ${formatGbp(item.cost)}
+                                        ${window.formatGbp(item.cost)}
                                     </span>
                                     <button onclick="recordScheduleToExpense('${item.id}', '${dateId}')" title="家計簿に記録" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold transition">
                                         計上
@@ -1133,13 +1171,10 @@
                     </div>
                 </div>
             `;
-        }
+        };
 
-        // ==========================================
-        // SCHEDULE DETAIL MODAL CONTROLS
-        // ==========================================
-        function openScheduleDetailModal(id, dateId) {
-            const item = (appState.schedules[dateId] || []).find(s => s.id === id);
+        window.openScheduleDetailModal = function(id, dateId) {
+            const item = (window.appState.schedules[dateId] || []).find(s => s.id === id);
             if (!item) return;
 
             const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
@@ -1165,22 +1200,22 @@
             }
 
             badgeCont.innerHTML = `
-                <span class="font-bold text-[10px] text-white bg-ukgold px-2 py-0.5 rounded-md font-mono">${escapeHtml(item.time)}</span>
-                <span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${escapeHtml(dateObj.short)} (${dateObj.day})</span>
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${categoryClass}">${escapeHtml(categoryLabel)}</span>
+                <span class="font-bold text-[10px] text-white bg-ukgold px-2 py-0.5 rounded-md font-mono">${window.escapeHtml(item.time)}</span>
+                <span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dateObj.short)} (${dateObj.day})</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${categoryClass}">${window.escapeHtml(categoryLabel)}</span>
             `;
 
             if (item.category === 'sightseeing') {
                 titleEl.textContent = item.spot;
                 bodyEl.innerHTML = `
-                    ${item.action ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ:</span> ${escapeHtml(item.action)}</div>` : ''}
-                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${escapeHtml(item.memo)}</div>` : ''}
+                    ${item.action ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ:</span> ${window.escapeHtml(item.action)}</div>` : ''}
+                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
                     <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
                         <span class="text-ukcinder/80 font-medium">予想予算:</span>
-                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
                     </div>
                     ${item.mapUrl ? `
-                        <a href="${escapeHtml(item.mapUrl)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-uknavy text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukcinder transition shadow-sm">
+                        <a href="${window.escapeHtml(item.mapUrl)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-uknavy text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukcinder transition shadow-sm">
                             <i class="fa-solid fa-map-location-dot"></i> Google Mapで開く
                         </a>
                     ` : ''}
@@ -1188,14 +1223,14 @@
             } else if (item.category === 'dining') {
                 titleEl.textContent = item.name;
                 bodyEl.innerHTML = `
-                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-amber-900">ジャンル:</span> ${escapeHtml(item.dineType || '食事')}</div>
-                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${escapeHtml(item.memo)}</div>` : ''}
+                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-amber-900">ジャンル:</span> ${window.escapeHtml(item.dineType || '食事')}</div>
+                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
                     <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
                         <span class="text-ukcinder/80 font-medium">予算目安:</span>
-                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
                     </div>
                     ${item.url ? `
-                        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-ukgold text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukred transition shadow-sm">
+                        <a href="${window.escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-ukgold text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukred transition shadow-sm">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> 予約・参考Webサイト
                         </a>
                     ` : ''}
@@ -1204,21 +1239,21 @@
                 titleEl.textContent = `${item.from} ➔ ${item.to}`;
                 bodyEl.innerHTML = `
                     <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 space-y-1">
-                        <div><span class="font-bold text-ukcinder">移動手段:</span> ${escapeHtml(item.mode)} ${item.line ? `(${escapeHtml(item.line)} Line)` : ''} ${item.busNo ? `(系統: ${escapeHtml(item.busNo)})` : ''}</div>
-                        ${item.duration ? `<div><span class="font-bold text-ukcinder">所要時間:</span> 約 ${escapeHtml(item.duration)}</div>` : ''}
+                        <div><span class="font-bold text-ukcinder">移動手段:</span> ${window.escapeHtml(item.mode)} ${item.line ? `(${window.escapeHtml(item.line)} Line)` : ''} ${item.busNo ? `(系統: ${window.escapeHtml(item.busNo)})` : ''}</div>
+                        ${item.duration ? `<div><span class="font-bold text-ukcinder">所要時間:</span> 約 ${window.escapeHtml(item.duration)}</div>` : ''}
                     </div>
                     <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
                         <span class="text-ukcinder/80 font-medium">運賃 / 費用:</span>
-                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
                     </div>
                 `;
             } else {
                 titleEl.textContent = item.title;
                 bodyEl.innerHTML = `
-                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${escapeHtml(item.memo)}</div>` : ''}
+                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
                     <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
                         <span class="text-ukcinder/80 font-medium">予想費用:</span>
-                        <span class="font-bold text-ukcinder text-sm">${formatGbp(item.cost)} (${formatJpy(item.cost)})</span>
+                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
                     </div>
                 `;
             }
@@ -1237,131 +1272,214 @@
             const modal = document.getElementById('scheduleDetailModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-        }
+        };
 
-        function closeScheduleDetailModal() {
+        window.closeScheduleDetailModal = function() {
             const modal = document.getElementById('scheduleDetailModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-        }
+        };
 
-        function closeScheduleDetailModalOnBackdrop(e) {
+        window.closeScheduleDetailModalOnBackdrop = function(e) {
             if (e.target.id === 'scheduleDetailModal') {
-                closeScheduleDetailModal();
+                window.closeScheduleDetailModal();
             }
-        }
+        };
 
-        // ==========================================
-        // SECTION 2: BUDGET & EXPENSE
-        // ==========================================
-        function promptEditDailyTotalBudget() {
-            const isAll = appState.selectedDate === 'ALL';
-            const dateId = isAll ? TRIP_DATES[0].id : appState.selectedDate;
+        let activeBudgetModalType = 'total';
+
+        window.promptEditDailyTotalBudget = function() {
+            activeBudgetModalType = 'total';
+            const isAll = window.appState.selectedDate === 'ALL';
+            const dateId = isAll ? TRIP_DATES[0].id : window.appState.selectedDate;
             const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
-            const currentBudget = appState.dailyBudgets[dateId] ?? 100;
+            const currentBudget = window.appState.dailyBudgets[dateId] ?? 100;
 
+            document.getElementById('budgetModalTitle').innerHTML = `<i class="fa-solid fa-coins text-ukgold"></i> 1日の目標予算を設定`;
             document.getElementById('budgetModalDateLabel').textContent = isAll
                 ? `全日程一括：1日あたりの予算上限 (£ GBP) ※8日間合計に反映されます`
                 : `${dateObj.jp} の予算上限 (£ GBP)`;
+            document.getElementById('modalInputLabel').textContent = '合計予算額 (£ GBP)';
+            
             const input = document.getElementById('modalBudgetInput');
             input.value = currentBudget;
             document.getElementById('modalBudgetJpyPreview').textContent = isAll
-                ? `≈ ${formatJpy(currentBudget)} /日（8日間計: ${formatGbp(currentBudget * 8)} / ${formatJpy(currentBudget * 8)}）`
-                : `≈ ${formatJpy(currentBudget)} JPY`;
+                ? `≈ ${window.formatJpy(currentBudget)} /日（8日間計: ${window.formatGbp(currentBudget * 8)} / ${window.formatJpy(currentBudget * 8)}）`
+                : `≈ ${window.formatJpy(currentBudget)} JPY`;
 
             input.oninput = () => {
                 const v = parseFloat(input.value) || 0;
                 document.getElementById('modalBudgetJpyPreview').textContent = isAll
-                    ? `≈ ${formatJpy(v)} /日（8日間計: ${formatGbp(v * 8)} / ${formatJpy(v * 8)}）`
-                    : `≈ ${formatJpy(v)} JPY`;
+                    ? `≈ ${window.formatJpy(v)} /日（8日間計: ${window.formatGbp(v * 8)} / ${window.formatJpy(v * 8)}）`
+                    : `≈ ${window.formatJpy(v)} JPY`;
             };
 
             const modal = document.getElementById('budgetModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-        }
+        };
 
-        function closeBudgetModal() {
+        window.promptEditSubCategoryBudget = function(catKey, catLabel) {
+            activeBudgetModalType = catKey;
+            const isAll = window.appState.selectedDate === 'ALL';
+            const dateId = isAll ? TRIP_DATES[0].id : window.appState.selectedDate;
+            const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
+            
+            if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
+            if (!window.appState.dailySubBudgets[dateId]) {
+                const total = window.appState.dailyBudgets[dateId] ?? 100;
+                window.appState.dailySubBudgets[dateId] = { '食事': total * 0.4, 'ショッピング': total * 0.3, '交通費': total * 0.2, 'その他': total * 0.1 };
+            }
+            const currentSub = window.appState.dailySubBudgets[dateId][catKey] ?? 25;
+
+            document.getElementById('budgetModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-ukgold"></i> ${catLabel}の予算を設定`;
+            document.getElementById('budgetModalDateLabel').textContent = isAll
+                ? `全日程一括：${catLabel}の1日あたり予算上限 (£ GBP)`
+                : `${dateObj.jp} の ${catLabel} 予算上限 (£ GBP)`;
+            document.getElementById('modalInputLabel').textContent = `${catLabel} 予算額 (£ GBP)`;
+
+            const input = document.getElementById('modalBudgetInput');
+            input.value = currentSub;
+            document.getElementById('modalBudgetJpyPreview').textContent = isAll
+                ? `≈ ${window.formatJpy(currentSub)} /日（8日間計: ${window.formatGbp(currentSub * 8)} / ${window.formatJpy(currentSub * 8)}）`
+                : `≈ ${window.formatJpy(currentSub)} JPY`;
+
+            input.oninput = () => {
+                const v = parseFloat(input.value) || 0;
+                document.getElementById('modalBudgetJpyPreview').textContent = isAll
+                    ? `≈ ${window.formatJpy(v)} /日（8日間計: ${window.formatGbp(v * 8)} / ${window.formatJpy(v * 8)}）`
+                    : `≈ ${window.formatJpy(v)} JPY`;
+            };
+
+            const modal = document.getElementById('budgetModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeBudgetModal = function() {
             const modal = document.getElementById('budgetModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-        }
+        };
 
-        function saveDailyTotalBudget() {
+        window.saveBudgetFromModal = function() {
             const val = parseFloat(document.getElementById('modalBudgetInput').value);
             if (isNaN(val) || val < 0) {
-                showToast('0以上の有効な金額を入力してください', 'error');
+                window.showToast('有効な金額を入力してください', 'error');
                 return;
             }
-            if (appState.selectedDate === 'ALL') {
-                TRIP_DATES.forEach(d => {
-                    appState.dailyBudgets[d.id] = val;
-                });
-                saveState();
-                closeBudgetModal();
-                renderBudget();
-                showToast(`全8日間の1日あたり予算を ${formatGbp(val)}（合計 ${formatGbp(val * 8)}）に更新しました`);
+
+            if (activeBudgetModalType === 'total') {
+                if (window.appState.selectedDate === 'ALL') {
+                    TRIP_DATES.forEach(d => {
+                        window.appState.dailyBudgets[d.id] = val;
+                        if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
+                        const perCat = val / 4;
+                        window.appState.dailySubBudgets[d.id] = { '食事': perCat, 'ショッピング': perCat, '交通費': perCat, 'その他': perCat };
+                    });
+                    window.saveState();
+                    window.closeBudgetModal();
+                    window.renderBudget();
+                    window.showToast(`全8日間の1日あたり予算を ${window.formatGbp(val)} に更新しました`);
+                } else {
+                    window.appState.dailyBudgets[window.appState.selectedDate] = val;
+                    if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
+                    const perCat = val / 4;
+                    window.appState.dailySubBudgets[window.appState.selectedDate] = { '食事': perCat, 'ショッピング': perCat, '交通費': perCat, 'その他': perCat };
+                    window.saveState();
+                    window.closeBudgetModal();
+                    window.renderBudget();
+                    window.showToast('1日の目標予算を更新しました');
+                }
             } else {
-                appState.dailyBudgets[appState.selectedDate] = val;
-                saveState();
-                closeBudgetModal();
-                renderBudget();
-                showToast('1日の目標予算を更新しました');
+                const catKey = activeBudgetModalType;
+                if (window.appState.selectedDate === 'ALL') {
+                    TRIP_DATES.forEach(d => {
+                        if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
+                        if (!window.appState.dailySubBudgets[d.id]) {
+                            const total = window.appState.dailyBudgets[d.id] ?? 100;
+                            window.appState.dailySubBudgets[d.id] = { '食事': total * 0.4, 'ショッピング': total * 0.3, '交通費': total * 0.2, 'その他': total * 0.1 };
+                        }
+                        window.appState.dailySubBudgets[d.id][catKey] = val;
+
+                        const subs = window.appState.dailySubBudgets[d.id];
+                        window.appState.dailyBudgets[d.id] = Number(subs['食事'] || 0) + Number(subs['ショッピング'] || 0) + Number(subs['交通費'] || 0) + Number(subs['その他'] || 0);
+                    });
+                    window.saveState();
+                    window.closeBudgetModal();
+                    window.renderBudget();
+                    window.showToast(`全8日間の「${catKey}」の予算を更新し、メイン予算を自動調整しました`);
+                } else {
+                    const dateId = window.appState.selectedDate;
+                    if (!window.appState.dailySubBudgets) window.appState.dailySubBudgets = {};
+                    if (!window.appState.dailySubBudgets[dateId]) {
+                        const total = window.appState.dailyBudgets[dateId] ?? 100;
+                        window.appState.dailySubBudgets[dateId] = { '食事': total * 0.4, 'ショッピング': total * 0.3, '交通費': total * 0.2, 'その他': total * 0.1 };
+                    }
+                    window.appState.dailySubBudgets[dateId][catKey] = val;
+
+                    const subs = window.appState.dailySubBudgets[dateId];
+                    window.appState.dailyBudgets[dateId] = Number(subs['食事'] || 0) + Number(subs['ショッピング'] || 0) + Number(subs['交通費'] || 0) + Number(subs['その他'] || 0);
+
+                    window.saveState();
+                    window.closeBudgetModal();
+                    window.renderBudget();
+                    window.showToast(`「${catKey}」の予算を更新し、メイン予算を自動調整しました`);
+                }
             }
-        }
+        };
 
-        function updateExpenseJpyPreview() {
+        window.updateExpenseJpyPreview = function() {
             const val = parseFloat(document.getElementById('expAmount').value) || 0;
-            document.getElementById('expCalcJpy').textContent = `${formatJpy(val)} JPY`;
-        }
+            document.getElementById('expCalcJpy').textContent = `${window.formatJpy(val)} JPY`;
+        };
 
-        function handleAddExpense(e) {
+        window.handleAddExpense = function(e) {
             e.preventDefault();
             const title = document.getElementById('expTitle').value.trim();
             const amount = parseFloat(document.getElementById('expAmount').value);
             const category = document.getElementById('expCategory').value;
 
             if (!title || isNaN(amount) || amount <= 0) {
-                showToast('品名と正しい金額を入力してください', 'error');
+                window.showToast('品名と正しい金額を入力してください', 'error');
                 return;
             }
 
-            const dateId = appState.selectedDate === 'ALL'
+            const dateId = window.appState.selectedDate === 'ALL'
                 ? (document.getElementById('expTargetDate').value || TRIP_DATES[0].id)
-                : appState.selectedDate;
+                : window.appState.selectedDate;
 
-            if (!appState.expenses[dateId]) {
-                appState.expenses[dateId] = [];
+            if (!window.appState.expenses[dateId]) {
+                window.appState.expenses[dateId] = [];
             }
-            appState.expenses[dateId].push({
+            window.appState.expenses[dateId].push({
                 id: 'exp_' + Date.now(),
                 title,
                 category,
                 amount
             });
-            saveState();
+            window.saveState();
 
             document.getElementById('addExpenseForm').reset();
-            updateExpenseJpyPreview();
-            renderBudget();
-            showToast('支出を記録しました');
-        }
+            window.updateExpenseJpyPreview();
+            window.renderBudget();
+            window.showToast('支出を記録しました');
+        };
 
-        function deleteExpenseItem(id, targetDateId = null) {
-            const dateId = targetDateId || appState.selectedDate;
-            if (!appState.expenses[dateId]) return;
-            appState.expenses[dateId] = appState.expenses[dateId].filter(e => e.id !== id);
-            saveState();
-            renderBudget();
-            showToast('支出記録を削除しました');
-        }
+        window.deleteExpenseItem = function(id, targetDateId = null) {
+            const dateId = targetDateId || window.appState.selectedDate;
+            if (!window.appState.expenses[dateId]) return;
+            window.appState.expenses[dateId] = window.appState.expenses[dateId].filter(e => e.id !== id);
+            window.saveState();
+            window.renderBudget();
+            window.showToast('支出記録を削除しました');
+        };
 
-        function renderBudget() {
-            const isAll = appState.selectedDate === 'ALL';
-            const dateId = appState.selectedDate;
+        window.renderBudget = function() {
+            const isAll = window.appState.selectedDate === 'ALL';
+            const dateId = window.appState.selectedDate;
             const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
 
-            // Populate & toggle date selector inside expense form when in ALL view
             const expDateContainer = document.getElementById('expenseDateSelectContainer');
             const expTargetDateSelect = document.getElementById('expTargetDate');
             if (isAll) {
@@ -1373,14 +1491,13 @@
                 expDateContainer.classList.add('hidden');
             }
 
-            // Compute budget & expenses
             let periodTotalBudget = 0;
             let periodExpenses = [];
 
             if (isAll) {
                 TRIP_DATES.forEach((d, idx) => {
-                    periodTotalBudget += Number(appState.dailyBudgets[d.id] ?? 100);
-                    const dayExps = appState.expenses[d.id] || [];
+                    periodTotalBudget += Number(window.appState.dailyBudgets[d.id] ?? 100);
+                    const dayExps = window.appState.expenses[d.id] || [];
                     dayExps.forEach(exp => {
                         periodExpenses.push({
                             ...exp,
@@ -1390,8 +1507,8 @@
                     });
                 });
             } else {
-                periodTotalBudget = Number(appState.dailyBudgets[dateId] ?? 100);
-                periodExpenses = (appState.expenses[dateId] || []).map(exp => ({
+                periodTotalBudget = Number(window.appState.dailyBudgets[dateId] ?? 100);
+                periodExpenses = (window.appState.expenses[dateId] || []).map(exp => ({
                     ...exp,
                     _dateId: dateId,
                     _dayShort: `${dateObj.short}`
@@ -1405,41 +1522,31 @@
                 : 0;
 
             document.getElementById('budgetDateHeading').textContent = isAll
-                ? '全体 (1〜8日目合計) 残り'
-                : `${dateObj.short} (${dateObj.day}) の残り`;
+                ? '全体 (1〜8日目合計) の残りの予算'
+                : `${dateObj.short} (${dateObj.day}) の残りの予算`;
             
             const remGbpEl = document.getElementById('mainRemGbp');
-            remGbpEl.textContent = formatGbp(remaining);
-            remGbpEl.className = `text-4xl sm:text-5xl font-black tracking-tight ${remaining < 0 ? 'text-ukred' : 'text-slate-800'}`;
+            remGbpEl.textContent = window.formatGbp(remaining);
+            remGbpEl.className = `text-3xl sm:text-4xl font-black tracking-tight ${remaining < 0 ? 'text-ukred' : 'text-ukcinder'}`;
             
-            document.getElementById('mainRemJpy').textContent = `(=${formatJpy(remaining)})`;
-            document.getElementById('mainTotalGbp').textContent = formatGbp(periodTotalBudget);
-            document.getElementById('mainTotalJpy').textContent = `(=${formatJpy(periodTotalBudget)})`;
+            document.getElementById('mainRemJpy').textContent = `(=${window.formatJpy(remaining)})`;
+            document.getElementById('mainTotalGbp').textContent = window.formatGbp(periodTotalBudget);
+            document.getElementById('mainTotalJpy').textContent = `(=${window.formatJpy(periodTotalBudget)})`;
 
-            // Update Donut/Progress Bar
-            const bar = document.getElementById('mainDonutBar');
-            bar.style.width = `${remPercent}%`;
+            const circle = document.getElementById('mainDonutCircle');
+            circle.setAttribute('stroke-dasharray', `${remPercent}, 100`);
             if (remaining < 0) {
-                bar.className = 'bg-red-700 h-full transition-all duration-500 rounded-full';
+                circle.setAttribute('class', 'text-red-700 transition-all duration-500');
             } else if (remPercent < 25) {
-                bar.className = 'bg-ukgold h-full transition-all duration-500 rounded-full';
+                circle.setAttribute('class', 'text-ukgold transition-all duration-500');
             } else {
-                bar.className = 'bg-uknavy h-full transition-all duration-500 rounded-full';
+                circle.setAttribute('class', 'text-uknavy transition-all duration-500');
             }
             document.getElementById('mainDonutPercent').textContent = `${remPercent}%`;
 
-            // Trip Overall Cumulative Spent
-            let tripTotalSpent = 0;
-            Object.values(appState.expenses).forEach(list => {
-                list.forEach(item => { tripTotalSpent += Number(item.amount || 0); });
-            });
-            document.getElementById('tripTotalSpentGbp').textContent = formatGbp(tripTotalSpent);
-            document.getElementById('tripTotalSpentJpy').textContent = formatJpy(tripTotalSpent);
-
-            // Sub Category Cards Grid
             const catConfigs = [
                 { key: '食事', icon: '☕️', label: '食事' },
-                { key: 'ショッピング', icon: '🛍', label: '買い物' },
+                { key: 'ショッピング', icon: '🛍', label: 'ショッピング' },
                 { key: '交通費', icon: '🚌', label: '交通費' },
                 { key: 'その他', icon: '💡', label: 'その他' }
             ];
@@ -1449,28 +1556,63 @@
                 const catSum = periodExpenses
                     .filter(e => e.category === cfg.key)
                     .reduce((s, e) => s + Number(e.amount || 0), 0);
-                const share = spentPeriod > 0 ? Math.round((catSum / spentPeriod) * 100) : 0;
+                
+                let catBudget = 0;
+                if (isAll) {
+                    TRIP_DATES.forEach(d => {
+                        const daySubs = window.appState.dailySubBudgets?.[d.id] || {};
+                        const fallbackDefault = (window.appState.dailyBudgets[d.id] ?? 100) / 4;
+                        catBudget += Number(daySubs[cfg.key] ?? fallbackDefault);
+                    });
+                } else {
+                    const daySubs = window.appState.dailySubBudgets?.[dateId] || {};
+                    const fallbackDefault = (window.appState.dailyBudgets[dateId] ?? 100) / 4;
+                    catBudget = Number(daySubs[cfg.key] ?? fallbackDefault);
+                }
+
+                const catRem = catBudget - catSum;
+                const catRemPercent = catBudget > 0 ? Math.max(0, Math.min(100, Math.round((catRem / catBudget) * 100))) : 0;
 
                 return `
-                    <div class="bg-white rounded-xl p-3 border border-uksidewalk shadow-sm flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                <span>${cfg.icon}</span> ${cfg.label}
-                            </span>
-                            <span class="text-[10px] font-semibold text-slate-400">${share}%</span>
-                        </div>
+                    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-uksidewalk shadow-sm flex flex-col justify-between">
                         <div>
-                            <div class="text-base font-black text-ukcinder leading-tight">${formatGbp(catSum)}</div>
-                            <div class="text-[10px] text-slate-400 font-medium">${formatJpy(catSum)}</div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-ukcinder truncate">
+                                    <span>${cfg.icon}</span> <span class="truncate">${cfg.label}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-1.5 my-1">
+                                <div class="flex items-baseline gap-1 flex-wrap">
+                                    <span class="text-xl sm:text-2xl font-black ${catRem < 0 ? 'text-ukred' : 'text-ukcinder'} tracking-tight">${window.formatGbp(catRem)}</span>
+                                    <span class="text-slate-500 text-[10px] sm:text-xs">(=${window.formatJpy(catRem)})</span>
+                                </div>
+
+                                <div class="relative w-12 h-12 sm:w-16 sm:h-16 mx-auto my-1 flex items-center justify-center">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="${catRem < 0 ? 'text-red-700' : 'text-uknavy'} transition-all duration-500" stroke-dasharray="${catRemPercent}, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-center">
+                                        <span class="text-[10px] sm:text-[11px] font-black text-ukcinder">${catRemPercent}%</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-2">
-                            <div class="bg-uknavy h-full rounded-full transition-all duration-500" style="width: ${share}%"></div>
+
+                        <div class="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-100 text-[10px] sm:text-xs">
+                            <div class="flex items-center gap-1 text-slate-500 font-semibold truncate">
+                                <span>/</span>
+                                <span class="font-bold text-ukcinder truncate">${window.formatGbp(catBudget)}</span>
+                            </div>
+                            <button onclick="promptEditSubCategoryBudget('${cfg.key}', '${cfg.label}')" title="予算を編集" class="text-xs text-uknavy hover:bg-amber-50 p-1.5 rounded-lg border border-ukgold/40 transition font-semibold shrink-0">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            // Expense Table
             document.getElementById('expenseTableHeading').textContent = isAll ? '全日程の支出明細' : '本日の支出明細';
             document.getElementById('expenseItemCount').textContent = `${periodExpenses.length} 件`;
 
@@ -1498,10 +1640,10 @@
             tbody.innerHTML = periodExpenses.map(exp => {
                 return `
                     <tr class="hover:bg-slate-50/80 transition">
-                        ${isAll ? `<td class="py-2.5 text-[11px] font-bold text-slate-500 whitespace-nowrap">${escapeHtml(exp._dayShort)}</td>` : ''}
-                        <td class="py-2.5 font-medium text-ukcinder text-xs">${escapeHtml(exp.title)}</td>
-                        <td class="py-2.5 text-right font-bold text-ukcinder text-xs">${formatGbp(exp.amount)}</td>
-                        <td class="py-2.5 text-right text-[11px] text-slate-400">${formatJpy(exp.amount)}</td>
+                        ${isAll ? `<td class="py-2.5 text-[11px] font-bold text-slate-500 whitespace-nowrap">${window.escapeHtml(exp._dayShort)}</td>` : ''}
+                        <td class="py-2.5 font-medium text-ukcinder text-xs">${window.escapeHtml(exp.title)}</td>
+                        <td class="py-2.5 text-right font-bold text-ukcinder text-xs">${window.formatGbp(exp.amount)}</td>
+                        <td class="py-2.5 text-right text-[11px] text-slate-400">${window.formatJpy(exp.amount)}</td>
                         <td class="py-2.5 text-center">
                             <button onclick="deleteExpenseItem('${exp.id}', '${exp._dateId}')" title="削除" class="text-slate-300 hover:text-uknavy p-1 transition">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
@@ -1510,49 +1652,46 @@
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        // ==========================================
-        // SECTION 3: CHECKLIST
-        // ==========================================
-        function handleAddChecklistItem(e) {
+        window.handleAddChecklistItem = function(e) {
             e.preventDefault();
             const category = document.getElementById('checkCategory').value;
             const text = document.getElementById('checkItemName').value.trim();
             if (!text) return;
 
-            appState.checklist.push({
+            window.appState.checklist.push({
                 id: 'chk_' + Date.now(),
                 category,
                 text,
                 checked: false
             });
-            saveState();
+            window.saveState();
 
             document.getElementById('checkItemName').value = '';
-            renderChecklist();
-            showToast('持ち物リストにアイテムを追加しました');
-        }
+            window.renderChecklist();
+            window.showToast('持ち物リストにアイテムを追加しました');
+        };
 
-        function toggleChecklistItem(id) {
-            const item = appState.checklist.find(c => c.id === id);
+        window.toggleChecklistItem = function(id) {
+            const item = window.appState.checklist.find(c => c.id === id);
             if (item) {
                 item.checked = !item.checked;
-                saveState();
-                renderChecklist();
+                window.saveState();
+                window.renderChecklist();
             }
-        }
+        };
 
-        function deleteChecklistItem(id) {
-            appState.checklist = appState.checklist.filter(c => c.id !== id);
-            saveState();
-            renderChecklist();
-            showToast('アイテムを削除しました');
-        }
+        window.deleteChecklistItem = function(id) {
+            window.appState.checklist = window.appState.checklist.filter(c => c.id !== id);
+            window.saveState();
+            window.renderChecklist();
+            window.showToast('アイテムを削除しました');
+        };
 
-        function renderChecklist() {
-            const total = appState.checklist.length;
-            const checkedCount = appState.checklist.filter(c => c.checked).length;
+        window.renderChecklist = function() {
+            const total = window.appState.checklist.length;
+            const checkedCount = window.appState.checklist.filter(c => c.checked).length;
             const percent = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
 
             document.getElementById('checklistCountText').textContent = `${checkedCount}/${total}`;
@@ -1568,14 +1707,14 @@
 
             const grid = document.getElementById('checklistGrid');
             grid.innerHTML = categories.map(cat => {
-                const items = appState.checklist.filter(c => c.category === cat.name);
+                const items = window.appState.checklist.filter(c => c.category === cat.name);
                 const catDone = items.filter(c => c.checked).length;
 
                 return `
                     <div class="bg-white rounded-2xl p-5 border border-uksidewalk shadow-sm flex flex-col">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
                             <h3 class="font-bold text-ukcinder text-sm flex items-center gap-2">
-                                <span class="text-base">${cat.icon}</span> ${escapeHtml(cat.name)}
+                                <span class="text-base">${cat.icon}</span> ${window.escapeHtml(cat.name)}
                             </h3>
                             <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${catDone === items.length && items.length > 0 ? 'bg-amber-100 text-amber-900 border border-ukgold/40' : 'bg-slate-100 text-slate-600'}">
                                 ${catDone} / ${items.length}
@@ -1588,7 +1727,7 @@
                                         <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleChecklistItem('${item.id}')" 
                                                class="w-4 h-4 rounded text-uknavy focus:ring-ukgold border-slate-300 cursor-pointer">
                                         <span class="text-sm transition ${item.checked ? 'line-through text-slate-400' : 'text-ukcinder font-medium'}">
-                                            ${escapeHtml(item.text)}
+                                            ${window.escapeHtml(item.text)}
                                         </span>
                                     </label>
                                     <button onclick="deleteChecklistItem('${item.id}')" title="削除" class="text-slate-300 hover:text-uknavy p-1 transition">
@@ -1600,29 +1739,26 @@
                     </div>
                 `;
             }).join('');
-        }
+        };
 
-        // ==========================================
-        // INITIALIZATION
-        // ==========================================
-        function renderAll() {
-            document.getElementById('exchangeRateInput').value = appState.exchangeRate;
-            renderDateButtons();
-            renderItinerary();
-            renderBudget();
-            renderChecklist();
-        }
+        window.renderAll = function() {
+            document.getElementById('exchangeRateInput').value = window.appState.exchangeRate;
+            window.renderDateButtons();
+            window.renderItinerary();
+            window.renderBudget();
+            window.renderChecklist();
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
-            setFormCategory(appState.formCategory || 'sightseeing');
-            switchMainTab(appState.activeTab || 'itinerary');
+            window.setFormCategory(window.appState.formCategory || 'sightseeing');
+            window.switchMainTab(window.appState.activeTab || 'itinerary');
+            loadLocalStorageState();
+            initFirebase();
 
-            // Offline status detection listener
             function updateOnlineStatus() {
                 const badge = document.getElementById('offlineBadge');
                 if (!navigator.onLine) {
                     badge.classList.remove('hidden');
-                    showToast('現在オフラインモードで動作中です (データは端末に保存されます)', 'warning');
                 } else {
                     badge.classList.add('hidden');
                 }
@@ -1630,36 +1766,6 @@
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
             updateOnlineStatus();
-
-            // Register PWA Service Worker for Offline Capability
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    const CACHE_NAME = 'uk-trip-v1';
-                    self.addEventListener('install', (e) => {
-                        e.waitUntil(
-                            caches.open(CACHE_NAME).then((cache) => {
-                                return cache.addAll([
-                                    './',
-                                    'https://cdn.tailwindcss.com',
-                                    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-                                    'https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700;900&display=swap'
-                                ]).catch(() => {});
-                            })
-                        );
-                        self.skipWaiting();
-                    });
-                    self.addEventListener('fetch', (e) => {
-                        e.respondWith(
-                            caches.match(e.request).then((res) => {
-                                return res || fetch(e.request).catch(() => caches.match('./'));
-                            })
-                        );
-                    });
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(() => {});
-            }
         });
     </script>
 </body>
