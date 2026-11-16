@@ -263,21 +263,20 @@
 
                     <!-- Dynamic: Dining Form -->
                     <div id="formFields_dining" class="space-y-2.5 hidden">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">種別</label>
-                                <select id="dineType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:border-uknavy font-semibold">
-                                    <option value="Breakfast">Breakfast</option>
-                                    <option value="Lunch">Lunch</option>
-                                    <option value="Dinner">Dinner</option>
-                                    <option value="Cafe">Cafe</option>
-                                    <option value="Pub">Pub</option>
-                                </select>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-1 font-medium">種別</label>
+                            <input type="hidden" id="dineType" value="Breakfast">
+                            <div class="grid grid-cols-5 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+                                <button type="button" onclick="setDiningType('Breakfast')" id="dineBtn_Breakfast" class="py-2 rounded-lg bg-white text-uknavy shadow transition text-center font-bold">Breakfast</button>
+                                <button type="button" onclick="setDiningType('Lunch')" id="dineBtn_Lunch" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center font-medium">Lunch</button>
+                                <button type="button" onclick="setDiningType('Dinner')" id="dineBtn_Dinner" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center font-medium">Dinner</button>
+                                <button type="button" onclick="setDiningType('Cafe')" id="dineBtn_Cafe" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center font-medium">Cafe</button>
+                                <button type="button" onclick="setDiningType('Pub')" id="dineBtn_Pub" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center font-medium">Pub</button>
                             </div>
-                            <div>
-                                <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">店名 <span class="text-uknavy">*</span></label>
-                                <input type="text" id="dineName" placeholder="例: The Ritz" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
-                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">店名 <span class="text-uknavy">*</span></label>
+                            <input type="text" id="dineName" placeholder="例: The Ritz" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
                         </div>
                         <div>
                             <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">メモ</label>
@@ -1050,6 +1049,19 @@
             }
         };
 
+        window.setDiningType = function(type) {
+            document.getElementById('dineType').value = type;
+            const types = ['Breakfast', 'Lunch', 'Dinner', 'Cafe', 'Pub'];
+            types.forEach(t => {
+                const btn = document.getElementById(`dineBtn_${t}`);
+                if (t === type) {
+                    btn.className = 'py-2 rounded-lg bg-white text-uknavy shadow transition text-center font-bold';
+                } else {
+                    btn.className = 'py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center font-medium';
+                }
+            });
+        };
+
         window.updateSchedCostPreview = function() {
             const val = parseFloat(document.getElementById('schedCost').value) || 0;
             document.getElementById('schedCostJpyPreview').textContent = `≈ ${window.formatJpy(val)}`;
@@ -1113,6 +1125,7 @@
             document.getElementById('addScheduleForm').reset();
             document.getElementById('schedTime').value = time;
             window.setFormCategory(cat);
+            window.setDiningType('Breakfast');
             window.updateSchedCostPreview();
 
             window.renderAll();
@@ -1128,6 +1141,18 @@
             window.showToast('予定を削除しました');
         };
 
+        window.getDiningBadgeColor = function(dineType) {
+            const map = {
+                'Breakfast': 'bg-[#d97706] text-white', // Warm Amber
+                'Lunch': 'bg-[#059669] text-white',     // Emerald Green
+                'Dinner': 'bg-[#334155] text-white',    // Brighter Rich Indigo/Navy
+                'Cafe': 'bg-[#e06d60] text-white',      // Salmon Pink
+                'Pub': 'bg-[#78350f] text-white'        // Brown
+            };
+            const key = (dineType || '').trim();
+            return map[key] || 'bg-amber-600 text-white';
+        };
+
         window.recordScheduleToExpense = function(id, targetDateId = null) {
             const dateId = targetDateId || window.appState.selectedDate;
             const item = (window.appState.schedules[dateId] || []).find(s => s.id === id);
@@ -1139,7 +1164,7 @@
                 title = item.spot;
                 expCat = 'その他';
             } else if (item.category === 'dining') {
-                title = `${item.name} (${item.dineType.split(' ')[0]})`;
+                title = `${item.name} (${item.dineType})`;
                 expCat = '食事';
             } else if (item.category === 'transport') {
                 title = `${item.mode}: ${item.from} → ${item.to}`;
@@ -1175,18 +1200,6 @@
                 'Metropolitan': 'bg-[#9B0056] text-white'
             };
             return map[line] || 'bg-slate-200 text-slate-800';
-        };
-
-        window.getDineTypeBadgeColor = function(dineType) {
-            const map = {
-                'Breakfast': 'bg-[#d97706] text-white', // Warm Amber
-                'Lunch': 'bg-[#059669] text-white',     // Emerald Green
-                'Dinner': 'bg-[#1e293b] text-white',    // Navy
-                'Cafe': 'bg-[#e06d60] text-white',      // Salmon Pink
-                'Pub': 'bg-[#78350f] text-white'        // Brown
-            };
-            const key = (dineType || '').trim();
-            return map[key] || 'bg-amber-600 text-white';
         };
 
         window.renderItinerary = function() {
@@ -1247,7 +1260,7 @@
 
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-uknavy';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 観光</span>`;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 Sightseeing</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
                     ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.action)}</p>` : ''}
@@ -1255,7 +1268,10 @@
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">${window.escapeHtml(item.dineType || '☕️ 食事')}</span>`;
+                const dType = item.dineType || 'Breakfast';
+                const diningMainBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">🍽️ Dining</span>`;
+                const diningSubBadge = `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded ${window.getDiningBadgeColor(dType)} shadow-sm">${window.escapeHtml(dType)}</span>`;
+                badgeHtml = diningMainBadge + ' ' + diningSubBadge;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.name)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             } else if (item.category === 'transport') {
@@ -1286,7 +1302,7 @@
                 detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
             } else {
                 dotColor = 'bg-uksidewalk';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 その他</span>`;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 Others</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.title)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             }
@@ -1332,16 +1348,16 @@
             let categoryLabel = '';
             let categoryClass = '';
             if (item.category === 'sightseeing') {
-                categoryLabel = '🏛 Sightseeing';
+                categoryLabel = 'Sightseeing';
                 categoryClass = 'bg-red-50 text-uknavy border-red-200';
             } else if (item.category === 'dining') {
-                categoryLabel = `🍽️ Dining (${item.dineType || 'Breakfast'})`;
+                categoryLabel = `Dining (${item.dineType || 'Breakfast'})`;
                 categoryClass = 'bg-amber-50 text-ukgold border-amber-200';
             } else if (item.category === 'transport') {
                 categoryLabel = `${item.mode}`;
                 categoryClass = 'bg-slate-100 text-slate-800 border-slate-200';
             } else {
-                categoryLabel = '💡 Others';
+                categoryLabel = 'Others';
                 categoryClass = 'bg-slate-100 text-ukcinder border-slate-200';
             }
 
@@ -1368,9 +1384,9 @@
                 `;
             } else if (item.category === 'dining') {
                 titleEl.textContent = item.name;
-                const cleanDineType = (item.dineType || 'Breakfast').replace(/[🍳🥪🍷☕️🍺]/g, '').trim();
+                const dType = item.dineType || 'Breakfast';
                 bodyEl.innerHTML = `
-                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 flex items-center gap-2"><span class="font-bold text-amber-900">ジャンル:</span> <span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(item.dineType)}">${window.escapeHtml(cleanDineType)}</span></div>
+                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 flex items-center gap-2"><span class="font-bold text-slate-700">ジャンル:</span> <span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(dType)}">${window.escapeHtml(dType)}</span></div>
                     ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
                     <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
                         <span class="text-ukcinder/80 font-medium">予算目安:</span>
@@ -1899,31 +1915,9 @@
         window.addEventListener('DOMContentLoaded', async () => {
             await loadAllSavedState();
             window.setFormCategory(window.appState.formCategory || 'sightseeing');
+            window.setDiningType('Breakfast');
             window.switchMainTab(window.appState.activeTab || 'itinerary');
             window.renderAll();
-            initFirebase();
-
-            // Force save when page goes into background or closes on iPhone PWA
-            window.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'hidden') {
-                    saveLocalStorageOnly();
-                }
-            });
-            window.addEventListener('pagehide', () => {
-                saveLocalStorageOnly();
-            });
-
-            function updateOnlineStatus() {
-                const badge = document.getElementById('offlineBadge');
-                if (!navigator.onLine) {
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
-            }
-            window.addEventListener('online', updateOnlineStatus);
-            window.addEventListener('offline', updateOnlineStatus);
-            updateOnlineStatus();
         });
     </script>
 </body>
