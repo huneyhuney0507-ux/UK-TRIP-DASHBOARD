@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK Travel Companion | 🇬🇧 イギリス旅行ガイド & 収支・旅程管理</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        uknavy: '#154673', // Header color (#154673)
+                        ukred: '#882426',  // Burgundy
+                        ukblue: '#154673',
+                        ukgold: '#c2352f', // Golden Afternoon
+                        uksidewalk: '#CDBEA7', // Sidewalk
+                        ukcinder: '#323030', // Cinder
+                        ukcream: '#F4F0E8', // Soft background matching sidewalk
+                        cardbg: '#FFFFFF'
+                    },
+                    fontFamily: {
+                        cinzel: ['Inter', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        anton: ['Anton', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F4F0E8;
+            font-family: 'Inter', sans-serif;
+            color: #323030;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #CDBEA7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #154673;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0E3050;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+        /* Mobile horizontal scroll container styling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
