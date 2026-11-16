@@ -1419,14 +1419,14 @@
                 titleContainer.innerHTML = `<h3 class="font-bold text-ukcinder text-base">予定の編集</h3>`;
                 
                 let editFieldsHtml = `
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
+                    <div class="grid grid-cols-2 gap-2 w-full min-w-0">
+                        <div class="min-w-0">
                             <label class="block font-semibold text-ukcinder mb-1">開始時間</label>
-                            <input type="time" id="editSchedTime" value="${item.time || '12:00'}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                            <input type="time" id="editSchedTime" value="${item.time || '12:00'}" class="w-full box-border appearance-none bg-white border border-ukcinder/20 rounded-xl px-2.5 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <label class="block font-semibold text-ukcinder mb-1">終了時間</label>
-                            <input type="time" id="editSchedEndTime" value="${item.endTime || ''}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                            <input type="time" id="editSchedEndTime" value="${item.endTime || ''}" class="w-full box-border appearance-none bg-white border border-ukcinder/20 rounded-xl px-2.5 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
                         </div>
                     </div>
                 `;
@@ -1485,14 +1485,14 @@
                     `;
                 } else if (item.category === 'transport') {
                     editFieldsHtml += `
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
+                        <div class="grid grid-cols-2 gap-2 w-full min-w-0">
+                            <div class="min-w-0">
                                 <label class="block font-semibold text-ukcinder mb-1">出発地</label>
-                                <input type="text" id="editTransFrom" value="${window.escapeHtml(item.from || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                                <input type="text" id="editTransFrom" value="${window.escapeHtml(item.from || '')}" class="w-full box-border bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
                             </div>
-                            <div>
+                            <div class="min-w-0">
                                 <label class="block font-semibold text-ukcinder mb-1">目的地</label>
-                                <input type="text" id="editTransTo" value="${window.escapeHtml(item.to || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                                <input type="text" id="editTransTo" value="${window.escapeHtml(item.to || '')}" class="w-full box-border bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
                             </div>
                         </div>
                         <div>
