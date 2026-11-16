@@ -231,7 +231,7 @@
                     <div>
                         <label class="block text-[11px] text-slate-500 mb-1 font-medium">カテゴリー</label>
                         <div class="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
-                            <button type="button" onclick="setFormCategory('sightseeing')" id="catBtn_sightseeing" class="py-2 rounded-lg bg-white text-uknavy shadow transition text-center">🏛 Sightseeing</button>
+                            <button type="button" onclick="setFormCategory('sightseeing')" id="catBtn_sightseeing" class="py-2 rounded-lg bg-white text-slate-700 shadow transition text-center">🏛 Sightseeing</button>
                             <button type="button" onclick="setFormCategory('dining')" id="catBtn_dining" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">🍽️ Dining</button>
                             <button type="button" onclick="setFormCategory('transport')" id="catBtn_transport" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">🚌 Transit</button>
                             <button type="button" onclick="setFormCategory('other')" id="catBtn_other" class="py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center">💡 Others</button>
@@ -1023,7 +1023,7 @@
                 const btn = document.getElementById(`catBtn_${c}`);
                 const fields = document.getElementById(`formFields_${c}`);
                 if (c === cat) {
-                    btn.className = 'py-2 rounded-lg bg-white text-uknavy shadow transition text-center';
+                    btn.className = 'py-2 rounded-lg bg-white text-slate-700 shadow transition text-center';
                     fields.classList.remove('hidden');
                 } else {
                     btn.className = 'py-2 rounded-lg text-slate-600 hover:bg-white/50 transition text-center';
@@ -1278,12 +1278,13 @@
                 : '';
 
             if (item.category === 'sightseeing') {
-                dotColor = 'bg-uknavy';
-                badgeHtml = dayTagHtml ? `<div class="flex items-center gap-1.5 flex-wrap mb-1.5">${dayTagHtml}</div>` : '';
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug pt-[11px]" style="${textStyle}">${window.escapeHtml(item.spot)}</h4>`;
+                dotColor = 'bg-slate-500';
+                const sightseeingBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">🏛️ Sightseeing</span>`;
+                badgeHtml = `<div class="flex items-center gap-1.5 flex-wrap mb-1.5">${sightseeingBadge} ${dayTagHtml}</div>`;
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
-                    ${item.action ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/20 p-1.5 rounded-lg border border-slate-100/40 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.action)}</p>` : ''}
-                    ${item.memo ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/20 p-1.5 rounded-lg border border-slate-100/40 whitespace-pre-wrap pb-[11px]" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : `<div class="pb-[11px]"></div>`}
+                    ${item.action ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/40 p-2 rounded-xl border border-slate-100/60 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.action)}</p>` : ''}
+                    ${item.memo ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/40 p-2 rounded-xl border border-slate-100/60 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : ''}
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
@@ -1291,7 +1292,7 @@
                 const diningMainBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">🍽️ Dining</span>`;
                 const diningSubBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(dType)} shadow-sm">${window.escapeHtml(dType)}</span>`;
                 badgeHtml = `<div class="flex items-center gap-1.5 flex-wrap mb-1.5">${diningMainBadge} ${diningSubBadge} ${dayTagHtml}</div>`;
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug pt-[5.5px]" style="${textStyle}">${window.escapeHtml(item.name)}</h4>`;
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug pt-0" style="${textStyle}">${window.escapeHtml(item.name)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/20 p-1.5 rounded-lg border border-slate-100/40 whitespace-pre-wrap pb-[5.5px]" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : `<div class="pb-[5.5px]"></div>`;
             } else if (item.category === 'transport') {
                 dotColor = 'bg-slate-700';
@@ -1312,7 +1313,7 @@
                 }
                 badgeHtml = `<div class="flex items-center gap-1.5 flex-wrap mb-1.5">${modeBadge} ${dayTagHtml}</div>`;
                 titleHtml = `
-                    <h4 class="font-bold ${textColorClass} text-xs sm:text-sm flex items-center gap-1.5 flex-wrap leading-snug pt-[5.5px]" style="${textStyle}">
+                    <h4 class="font-bold ${textColorClass} text-xs sm:text-sm flex items-center gap-1.5 flex-wrap leading-snug pt-0" style="${textStyle}">
                         <span>${window.escapeHtml(item.from)}</span>
                         <i class="fa-solid fa-arrow-right text-[10px] opacity-70"></i>
                         <span>${window.escapeHtml(item.to)}</span>
@@ -1322,8 +1323,8 @@
             } else {
                 dotColor = 'bg-uksidewalk';
                 badgeHtml = dayTagHtml ? `<div class="flex items-center gap-1.5 flex-wrap mb-1.5">${dayTagHtml}</div>` : '';
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug pt-[11px]" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
-                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/20 p-1.5 rounded-lg border border-slate-100/40 whitespace-pre-wrap pb-[11px]" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : `<div class="pb-[11px]"></div>`;
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-2.5 bg-slate-50/20 p-1.5 rounded-lg border border-slate-100/40 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
             }
 
             let endTimeStr = item.endTime || '';
@@ -1416,7 +1417,7 @@
             let categoryClass = '';
             if (item.category === 'sightseeing') {
                 categoryLabel = 'Sightseeing';
-                categoryClass = 'bg-red-50 text-uknavy border-red-200';
+                categoryClass = 'bg-slate-100 text-slate-700 border-slate-200';
             } else if (item.category === 'dining') {
                 categoryLabel = `Dining (${item.dineType || 'Breakfast'})`;
                 categoryClass = 'bg-amber-50 text-ukgold border-amber-200';
