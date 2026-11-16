@@ -294,12 +294,12 @@
                         <div>
                             <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">交通手段</label>
                             <select id="transMode" onchange="toggleTransportLineOptions()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy font-semibold">
-                                <option value="Underground">🚇 地下鉄 (Underground)</option>
-                                <option value="Bus">🚌 路線バス (Bus)</option>
-                                <option value="Train">🚆 鉄道 (Train)</option>
-                                <option value="Walking">🚶 徒歩 (Walking)</option>
-                                <option value="Taxi">🚖 タクシー / Uber</option>
-                                <option value="Flight">✈️ 飛行機 (Flight)</option>
+                                <option value="Underground">🚇 Underground</option>
+                                <option value="Bus">🚌 Bus</option>
+                                <option value="Train">🚆 Train</option>
+                                <option value="Walking">🚶 Walking</option>
+                                <option value="Taxi">🚖 Taxi / Uber</option>
+                                <option value="Flight">✈️ Flight</option>
                             </select>
                         </div>
 
@@ -1174,7 +1174,7 @@
                 'Circle': 'bg-[#FFD300] text-slate-900',
                 'Metropolitan': 'bg-[#9B0056] text-white'
             };
-            return map[line] || 'bg-ukblue text-white';
+            return map[line] || 'bg-slate-200 text-slate-800';
         };
 
         window.getDineTypeBadgeColor = function(dineType) {
@@ -1247,7 +1247,7 @@
 
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-uknavy';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 Sightseeing</span>`;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 観光</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
                     ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.action)}</p>` : ''}
@@ -1255,19 +1255,25 @@
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
-                badgeHtml = `
-                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">🍽️ Dining</span>
-                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${window.getDineTypeBadgeColor(item.dineType)}">${window.escapeHtml(item.dineType || 'Breakfast')}</span>
-                `;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">${window.escapeHtml(item.dineType || '☕️ 食事')}</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.name)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             } else if (item.category === 'transport') {
                 dotColor = 'bg-slate-700';
-                let modeBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">🚌 ${window.escapeHtml(item.mode)}</span>`;
+                const modeEmojis = {
+                    'Underground': '🚇',
+                    'Bus': '🚌',
+                    'Train': '🚆',
+                    'Walking': '🚶',
+                    'Taxi': '🚖',
+                    'Flight': '✈️'
+                };
+                const emoji = modeEmojis[item.mode] || '🚇';
+                let modeBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#eaf4d3] text-[#3b5204] border border-[#cbe394] shadow-sm">${emoji} ${window.escapeHtml(item.mode)}</span>`;
                 if (item.mode === 'Underground' && item.line) {
                     modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${window.getTubeLineBadgeColor(item.line)}">${window.escapeHtml(item.line)} Line</span>`;
                 } else if (item.mode === 'Bus' && item.busNo) {
-                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-uknavy text-white">No. ${window.escapeHtml(item.busNo)}</span>`;
+                    modeBadge += ` <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#f4f7cc] text-[#4d5b0c] border border-[#dce887]">No. ${window.escapeHtml(item.busNo)}</span>`;
                 }
                 badgeHtml = modeBadge;
                 titleHtml = `
@@ -1280,7 +1286,7 @@
                 detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
             } else {
                 dotColor = 'bg-uksidewalk';
-                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 Others</span>`;
+                badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 その他</span>`;
                 titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm">${window.escapeHtml(item.title)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 line-clamp-1">${window.escapeHtml(item.memo)}</p>` : '';
             }
@@ -1332,7 +1338,7 @@
                 categoryLabel = `🍽️ Dining (${item.dineType || 'Breakfast'})`;
                 categoryClass = 'bg-amber-50 text-ukgold border-amber-200';
             } else if (item.category === 'transport') {
-                categoryLabel = `🚌 Transit (${item.mode})`;
+                categoryLabel = `${item.mode}`;
                 categoryClass = 'bg-slate-100 text-slate-800 border-slate-200';
             } else {
                 categoryLabel = '💡 Others';
