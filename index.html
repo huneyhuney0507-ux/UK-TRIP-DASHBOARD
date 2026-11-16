@@ -1652,7 +1652,29 @@
                         </div>
                     `;
                 } else if (item.category === 'transport') {
+                    const lines = ['Piccadilly', 'Bakerloo', 'Central', 'District', 'Jubilee', 'Northern', 'Victoria', 'Elizabeth', 'Circle', 'Metropolitan'];
                     editFieldsHtml += `
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">交通手段 (乗り換え前)</label>
+                            <select id="editTransMode" onchange="toggleEditTransportOptions()" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                                <option value="Underground" ${item.mode === 'Underground' ? 'selected' : ''}>🚇 Underground</option>
+                                <option value="Bus" ${item.mode === 'Bus' ? 'selected' : ''}>🚌 Bus</option>
+                                <option value="Train" ${item.mode === 'Train' ? 'selected' : ''}>🚆 Train</option>
+                                <option value="Walking" ${item.mode === 'Walking' ? 'selected' : ''}>🚶 Walking</option>
+                                <option value="Taxi" ${item.mode === 'Taxi' ? 'selected' : ''}>🚖 Taxi / Uber</option>
+                                <option value="Flight" ${item.mode === 'Flight' ? 'selected' : ''}>✈️ Flight</option>
+                            </select>
+                        </div>
+                        <div id="editUndergroundLineContainer" class="${item.mode === 'Underground' ? '' : 'hidden'}">
+                            <label class="block font-semibold text-ukcinder mb-1">路線 (Line)</label>
+                            <select id="editTransLine" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                                ${lines.map(l => `<option value="${l}" ${item.line === l ? 'selected' : ''}>${l} Line</option>`).join('')}
+                            </select>
+                        </div>
+                        <div id="editBusDetailContainer" class="${item.mode === 'Bus' ? '' : 'hidden'}">
+                            <label class="block font-semibold text-ukcinder mb-1">系統番号</label>
+                            <input type="text" id="editTransBusNo" value="${window.escapeHtml(item.busNo || '')}" placeholder="例: 24" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
                         <div class="grid grid-cols-3 gap-1.5 w-full min-w-0">
                             <div>
                                 <label class="block font-semibold text-ukcinder mb-1 text-[11px]">出発地</label>
@@ -1667,6 +1689,33 @@
                                 <input type="text" id="editTransTo" value="${window.escapeHtml(item.to || '')}" class="w-full box-border bg-white border border-ukcinder/20 rounded-xl px-2 py-2 text-xs focus:outline-none focus:border-uknavy">
                             </div>
                         </div>
+
+                        <div class="p-2.5 bg-white/75 rounded-xl border border-ukcinder/15 space-y-2">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="editHasTransferTransit" ${item.hasPost ? 'checked' : ''} onchange="toggleEditPostTransferFields()" class="w-4 h-4 rounded text-uknavy focus:ring-ukgold border-slate-300">
+                                <span class="text-xs font-bold text-ukcinder">途中で乗り換える（後半の路線を追加）</span>
+                            </label>
+                            
+                            <div id="editPostTransferFieldsContainer" class="${item.hasPost ? '' : 'hidden'} space-y-2 pt-1">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block font-semibold text-ukcinder mb-1 text-[10px]">乗り換え後の交通手段</label>
+                                        <select id="editTransPostMode" class="w-full bg-white border border-ukcinder/20 rounded-xl px-2 py-2 text-xs font-semibold text-ukcinder focus:outline-none focus:border-uknavy">
+                                            <option value="Underground" ${item.postMode === 'Underground' ? 'selected' : ''}>🚇 Underground</option>
+                                            <option value="Bus" ${item.postMode === 'Bus' ? 'selected' : ''}>🚌 Bus</option>
+                                            <option value="Train" ${item.postMode === 'Train' ? 'selected' : ''}>🚆 Train</option>
+                                            <option value="Walking" ${item.postMode === 'Walking' ? 'selected' : ''}>🚶 Walking</option>
+                                            <option value="Taxi" ${item.postMode === 'Taxi' ? 'selected' : ''}>🚖 Taxi / Uber</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-ukcinder mb-1 text-[10px]">乗り換え後 路線/系統</label>
+                                        <input type="text" id="editTransPostDetail" value="${window.escapeHtml(item.postDetail || '')}" placeholder="例: Victoria Line" class="w-full bg-white border border-ukcinder/20 rounded-xl px-2 py-2 text-xs focus:outline-none focus:border-uknavy">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block font-semibold text-ukcinder mb-1">所要時間</label>
                             <input type="text" id="editTransDuration" value="${window.escapeHtml(item.duration || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
@@ -1803,6 +1852,17 @@
             modal.classList.add('flex');
         };
 
+        window.toggleEditPostTransferFields = function() {
+            const isChecked = document.getElementById('editHasTransferTransit').checked;
+            const cont = document.getElementById('editPostTransferFieldsContainer');
+            if (!cont) return;
+            if (isChecked) {
+                cont.classList.remove('hidden');
+            } else {
+                cont.classList.add('hidden');
+            }
+        };
+
         window.saveEditedSchedule = function(id, dateId) {
             const list = window.appState.schedules[dateId];
             if (!list) return;
@@ -1827,9 +1887,31 @@
                 item.url = document.getElementById('editDineUrl').value.trim();
                 item.cost = parseFloat(document.getElementById('editCost').value) || 0;
             } else if (item.category === 'transport') {
+                item.mode = document.getElementById('editTransMode').value;
+                if (item.mode === 'Underground') {
+                    item.line = document.getElementById('editTransLine').value;
+                    item.busNo = '';
+                } else if (item.mode === 'Bus') {
+                    item.busNo = document.getElementById('editTransBusNo').value.trim();
+                    item.line = '';
+                } else {
+                    item.line = '';
+                    item.busNo = '';
+                }
                 item.from = document.getElementById('editTransFrom').value.trim() || item.from;
                 item.transferAt = document.getElementById('editTransTransferAt').value.trim();
                 item.to = document.getElementById('editTransTo').value.trim() || item.to;
+
+                const hasPost = document.getElementById('editHasTransferTransit').checked;
+                item.hasPost = hasPost;
+                if (hasPost) {
+                    item.postMode = document.getElementById('editTransPostMode').value;
+                    item.postDetail = document.getElementById('editTransPostDetail').value.trim();
+                } else {
+                    item.postMode = '';
+                    item.postDetail = '';
+                }
+
                 item.duration = document.getElementById('editTransDuration').value.trim();
                 item.cost = parseFloat(document.getElementById('editCost').value) || 0;
             } else {
