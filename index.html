@@ -384,8 +384,8 @@
                             <input type="text" id="dineMemo" placeholder="例: アフタヌーンティー予約" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
                         </div>
                         <div>
-                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">予約・参考URL</label>
-                            <input type="url" id="dineUrl" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
+                            <label class="block text-[11px] text-slate-500 mb-0.5 font-medium">Google Map URL</label>
+                            <input type="url" id="dineUrl" placeholder="https://maps.google.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-uknavy">
                         </div>
                     </div>
 
@@ -1512,6 +1512,14 @@
                 ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dayPrefixLabel)}</span>`
                 : '';
 
+            // Check if item has a valid link (mapUrl for sightseeing, url for dining)
+            const itemLink = item.mapUrl || item.url || '';
+            const linkButtonHtml = itemLink ? `
+                <a href="${window.escapeHtml(itemLink)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="リンクを開く" class="text-slate-400 hover:text-uknavy p-1 transition flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-map-location-dot text-xs"></i>
+                </a>
+            ` : '';
+
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-slate-500';
                 const sightseeingBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">🏛️ Sightseeing</span>`;
@@ -1594,25 +1602,28 @@
             const dotClass = customDot.startsWith('#') ? '' : customDot;
             const cardBgStyle = customBg !== '#ffffff' ? `background-color: ${customBg};` : '';
 
-            const topHeaderHtml = (badgeHtml || dayTagHtml) ? `
+            const topHeaderHtml = (badgeHtml || dayTagHtml) && linkButtonHtml ? `
                 <div class="flex flex-wrap justify-between items-start gap-1 mb-1.5">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         ${dayTagHtml}
                         ${badgeHtml}
                     </div>
                     <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-                        <button onclick="promptDeleteScheduleItem('${item.id}', '${dateId}')" title="削除" class="text-slate-400 hover:text-uknavy p-1 transition">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
+                        ${linkButtonHtml}
                     </div>
                 </div>
-            ` : `
+            ` : linkButtonHtml ? `
                 <div class="absolute right-2.5 top-2.5 flex items-center gap-1" onclick="event.stopPropagation()">
-                    <button onclick="promptDeleteScheduleItem('${item.id}', '${dateId}')" title="削除" class="text-slate-400 hover:text-uknavy p-1 transition">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
+                    ${linkButtonHtml}
                 </div>
-            `;
+            ` : (badgeHtml || dayTagHtml) ? `
+                <div class="flex flex-wrap justify-between items-start gap-1 mb-1.5">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        ${dayTagHtml}
+                        ${badgeHtml}
+                    </div>
+                </div>
+            ` : '';
 
             return `
                 <div class="relative pl-[70px] sm:pl-[76px] group animate-fade-in py-2">
@@ -1743,7 +1754,7 @@
                             <input type="text" id="editDineMemo" value="${window.escapeHtml(item.memo || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
                         </div>
                         <div>
-                            <label class="block font-semibold text-ukcinder mb-1">予約・参考URL</label>
+                            <label class="block font-semibold text-ukcinder mb-1">Google Map URL</label>
                             <input type="url" id="editDineUrl" value="${window.escapeHtml(item.url || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
                         </div>
                         <div>
@@ -1895,8 +1906,8 @@
                             <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
                         </div>
                         ${item.url ? `
-                            <a href="${window.escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-ukgold text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukred transition shadow-sm">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i> 予約・参考Webサイト
+                            <a href="${window.escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-uknavy text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukcinder transition shadow-sm">
+                                <i class="fa-solid fa-map-location-dot"></i> Google Mapで開く
                             </a>
                         ` : ''}
                     `;
@@ -1936,7 +1947,7 @@
                 }
 
                 footerEl.innerHTML = `
-                    <button onclick="toggleScheduleEditMode()" class="${item.cost > 0 ? 'flex-1' : 'flex-1'} py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <button onclick="toggleScheduleEditMode()" class="flex-1 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-pen text-xs"></i> 編集
                     </button>
                     ${item.cost > 0 ? `
@@ -1944,6 +1955,9 @@
                             支出に計上
                         </button>
                     ` : ''}
+                    <button onclick="closeScheduleDetailModal(); promptDeleteScheduleItem('${id}', '${dateId}')" class="py-2.5 px-3 rounded-xl bg-red-100 hover:bg-red-200 text-ukred font-semibold transition flex items-center justify-center gap-1 shadow-sm" title="削除">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
                 `;
             }
 
