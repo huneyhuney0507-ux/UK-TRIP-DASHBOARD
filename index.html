@@ -110,18 +110,20 @@
         <div class="bg-[#ebc156] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-ukcinder/20 animate-fade-in space-y-4" onclick="event.stopPropagation()">
             <!-- Top Header -->
             <div class="flex justify-between items-start gap-2 border-b border-ukcinder/15 pb-3">
-                <div class="space-y-4">
+                <div class="space-y-4 w-full">
                     <div id="modalDetailBadgeContainer" class="flex items-center gap-1.5 flex-wrap">
                         <!-- Dynamic Category / Date badges -->
                     </div>
-                    <h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">--</h3>
+                    <div id="modalDetailTitleContainer">
+                        <h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">--</h3>
+                    </div>
                 </div>
                 <button onclick="closeScheduleDetailModal()" class="text-ukcinder/70 hover:text-ukcinder p-1.5 rounded-full bg-white/50 hover:bg-white/80 transition shrink-0">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <!-- Content Details -->
+            <!-- Content Details / Edit Form -->
             <div class="space-y-3 text-xs text-ukcinder" id="modalDetailBody">
                 <!-- Injected via JavaScript -->
             </div>
@@ -1339,9 +1341,25 @@
             const item = (window.appState.schedules[dateId] || []).find(s => s.id === id);
             if (!item) return;
 
+            window._currentEditingSchedule = { id, dateId };
+            window._isScheduleEditing = false;
+            window.renderScheduleModalContent();
+        };
+
+        window.toggleScheduleEditMode = function() {
+            window._isScheduleEditing = !window._isScheduleEditing;
+            window.renderScheduleModalContent();
+        };
+
+        window.renderScheduleModalContent = function() {
+            if (!window._currentEditingSchedule) return;
+            const { id, dateId } = window._currentEditingSchedule;
+            const item = (window.appState.schedules[dateId] || []).find(s => s.id === id);
+            if (!item) return;
+
             const dateObj = TRIP_DATES.find(d => d.id === dateId) || TRIP_DATES[0];
             const badgeCont = document.getElementById('modalDetailBadgeContainer');
-            const titleEl = document.getElementById('modalDetailTitle');
+            const titleContainer = document.getElementById('modalDetailTitleContainer');
             const bodyEl = document.getElementById('modalDetailBody');
             const footerEl = document.getElementById('modalDetailFooterActions');
 
@@ -1367,74 +1385,227 @@
                 <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${categoryClass}">${window.escapeHtml(categoryLabel)}</span>
             `;
 
-            if (item.category === 'sightseeing') {
-                titleEl.textContent = item.spot;
-                bodyEl.innerHTML = `
-                    ${item.action ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ:</span> ${window.escapeHtml(item.action)}</div>` : ''}
-                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
-                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
-                        <span class="text-ukcinder/80 font-medium">予想予算:</span>
-                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
+            if (window._isScheduleEditing) {
+                titleContainer.innerHTML = `<h3 class="font-bold text-ukcinder text-base">予定の編集</h3>`;
+                
+                let editFieldsHtml = `
+                    <div>
+                        <label class="block font-semibold text-ukcinder mb-1">時間</label>
+                        <input type="time" id="editSchedTime" value="${item.time || '12:00'}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
                     </div>
-                    ${item.mapUrl ? `
-                        <a href="${window.escapeHtml(item.mapUrl)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-uknavy text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukcinder transition shadow-sm">
-                            <i class="fa-solid fa-map-location-dot"></i> Google Mapで開く
-                        </a>
-                    ` : ''}
                 `;
-            } else if (item.category === 'dining') {
-                titleEl.textContent = item.name;
-                const dType = item.dineType || 'Breakfast';
-                bodyEl.innerHTML = `
-                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 flex items-center gap-2"><span class="font-bold text-slate-700">ジャンル:</span> <span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(dType)}">${window.escapeHtml(dType)}</span></div>
-                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
-                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
-                        <span class="text-ukcinder/80 font-medium">予算目安:</span>
-                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
-                    </div>
-                    ${item.url ? `
-                        <a href="${window.escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-ukgold text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukred transition shadow-sm">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 予約・参考Webサイト
-                        </a>
-                    ` : ''}
-                `;
-            } else if (item.category === 'transport') {
-                titleEl.textContent = `${item.from} ➔ ${item.to}`;
-                bodyEl.innerHTML = `
-                    <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 space-y-1">
-                        <div><span class="font-bold text-ukcinder">移動手段:</span> ${window.escapeHtml(item.mode)} ${item.line ? `(${window.escapeHtml(item.line)} Line)` : ''} ${item.busNo ? `(系統: ${window.escapeHtml(item.busNo)})` : ''}</div>
-                        ${item.duration ? `<div><span class="font-bold text-ukcinder">所要時間:</span> 約 ${window.escapeHtml(item.duration)}</div>` : ''}
-                    </div>
-                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
-                        <span class="text-ukcinder/80 font-medium">運賃 / 費用:</span>
-                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
-                    </div>
+
+                if (item.category === 'sightseeing') {
+                    editFieldsHtml += `
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">スポット名</label>
+                            <input type="text" id="editSpot" value="${window.escapeHtml(item.spot || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">メモ</label>
+                            <input type="text" id="editAction" value="${window.escapeHtml(item.action || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">詳細メモ</label>
+                            <input type="text" id="editMemo" value="${window.escapeHtml(item.memo || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">Google Map URL</label>
+                            <input type="url" id="editMapUrl" value="${window.escapeHtml(item.mapUrl || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">予算 (£ GBP)</label>
+                            <input type="number" step="0.01" min="0" id="editCost" value="${item.cost ?? 0}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                        </div>
+                    `;
+                } else if (item.category === 'dining') {
+                    editFieldsHtml += `
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">店名</label>
+                            <input type="text" id="editDineName" value="${window.escapeHtml(item.name || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">ジャンル</label>
+                            <select id="editDineType" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                                <option value="Breakfast" ${item.dineType === 'Breakfast' ? 'selected' : ''}>Breakfast</option>
+                                <option value="Lunch" ${item.dineType === 'Lunch' ? 'selected' : ''}>Lunch</option>
+                                <option value="Dinner" ${item.dineType === 'Dinner' ? 'selected' : ''}>Dinner</option>
+                                <option value="Cafe" ${item.dineType === 'Cafe' ? 'selected' : ''}>Cafe</option>
+                                <option value="Pub" ${item.dineType === 'Pub' ? 'selected' : ''}>Pub</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">メモ</label>
+                            <input type="text" id="editDineMemo" value="${window.escapeHtml(item.memo || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">予約・参考URL</label>
+                            <input type="url" id="editDineUrl" value="${window.escapeHtml(item.url || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">予算 (£ GBP)</label>
+                            <input type="number" step="0.01" min="0" id="editCost" value="${item.cost ?? 0}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                        </div>
+                    `;
+                } else if (item.category === 'transport') {
+                    editFieldsHtml += `
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-semibold text-ukcinder mb-1">出発地</label>
+                                <input type="text" id="editTransFrom" value="${window.escapeHtml(item.from || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-ukcinder mb-1">目的地</label>
+                                <input type="text" id="editTransTo" value="${window.escapeHtml(item.to || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">所要時間</label>
+                            <input type="text" id="editTransDuration" value="${window.escapeHtml(item.duration || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">運賃 (£ GBP)</label>
+                            <input type="number" step="0.01" min="0" id="editCost" value="${item.cost ?? 0}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                        </div>
+                    `;
+                } else {
+                    editFieldsHtml += `
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">タイトル</label>
+                            <input type="text" id="editOtherTitle" value="${window.escapeHtml(item.title || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">メモ</label>
+                            <input type="text" id="editOtherMemo" value="${window.escapeHtml(item.memo || '')}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-uknavy">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1">費用 (£ GBP)</label>
+                            <input type="number" step="0.01" min="0" id="editCost" value="${item.cost ?? 0}" class="w-full bg-white border border-ukcinder/20 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-uknavy">
+                        </div>
+                    `;
+                }
+
+                bodyEl.innerHTML = editFieldsHtml;
+                footerEl.innerHTML = `
+                    <button onclick="toggleScheduleEditMode()" class="flex-1 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition">
+                        キャンセル
+                    </button>
+                    <button onclick="saveEditedSchedule('${id}', '${dateId}')" class="flex-1 py-2.5 rounded-xl bg-uknavy text-white font-semibold hover:bg-ukcinder transition shadow">
+                        保存する
+                    </button>
                 `;
             } else {
-                titleEl.textContent = item.title;
-                bodyEl.innerHTML = `
-                    ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
-                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
-                        <span class="text-ukcinder/80 font-medium">予想費用:</span>
-                        <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
-                    </div>
+                if (item.category === 'sightseeing') {
+                    titleContainer.innerHTML = `<h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">${window.escapeHtml(item.spot)}</h3>`;
+                    bodyEl.innerHTML = `
+                        ${item.action ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ:</span> ${window.escapeHtml(item.action)}</div>` : ''}
+                        ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
+                        <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                            <span class="text-ukcinder/80 font-medium">予想予算:</span>
+                            <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
+                        </div>
+                        ${item.mapUrl ? `
+                            <a href="${window.escapeHtml(item.mapUrl)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-uknavy text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukcinder transition shadow-sm">
+                                <i class="fa-solid fa-map-location-dot"></i> Google Mapで開く
+                            </a>
+                        ` : ''}
+                    `;
+                } else if (item.category === 'dining') {
+                    titleContainer.innerHTML = `<h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">${window.escapeHtml(item.name)}</h3>`;
+                    const dType = item.dineType || 'Breakfast';
+                    bodyEl.innerHTML = `
+                        <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 flex items-center gap-2"><span class="font-bold text-slate-700">ジャンル:</span> <span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(dType)}">${window.escapeHtml(dType)}</span></div>
+                        ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">メモ・注文予定:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
+                        <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                            <span class="text-ukcinder/80 font-medium">予算目安:</span>
+                            <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
+                        </div>
+                        ${item.url ? `
+                            <a href="${window.escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-ukgold text-white rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-ukred transition shadow-sm">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> 予約・参考Webサイト
+                            </a>
+                        ` : ''}
+                    `;
+                } else if (item.category === 'transport') {
+                    titleContainer.innerHTML = `<h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">${window.escapeHtml(item.from)} ➔ ${window.escapeHtml(item.to)}</h3>`;
+                    bodyEl.innerHTML = `
+                        <div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10 space-y-1">
+                            <div><span class="font-bold text-ukcinder">移動手段:</span> ${window.escapeHtml(item.mode)} ${item.line ? `(${window.escapeHtml(item.line)} Line)` : ''} ${item.busNo ? `(系統: ${window.escapeHtml(item.busNo)})` : ''}</div>
+                            ${item.duration ? `<div><span class="font-bold text-ukcinder">所要時間:</span> 約 ${window.escapeHtml(item.duration)}</div>` : ''}
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                            <span class="text-ukcinder/80 font-medium">運賃 / 費用:</span>
+                            <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
+                        </div>
+                    `;
+                } else {
+                    titleContainer.innerHTML = `<h3 id="modalDetailTitle" class="font-bold text-ukcinder text-lg leading-tight">${window.escapeHtml(item.title)}</h3>`;
+                    bodyEl.innerHTML = `
+                        ${item.memo ? `<div class="p-2.5 rounded-xl bg-white/75 border border-ukcinder/10"><span class="font-bold text-ukcinder block mb-0.5">詳細メモ:</span> ${window.escapeHtml(item.memo)}</div>` : ''}
+                        <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/75 border border-ukcinder/10">
+                            <span class="text-ukcinder/80 font-medium">予想費用:</span>
+                            <span class="font-bold text-ukcinder text-sm">${window.formatGbp(item.cost)} (${window.formatJpy(item.cost)})</span>
+                        </div>
+                    `;
+                }
+
+                footerEl.innerHTML = `
+                    <button onclick="toggleScheduleEditMode()" class="px-3 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen text-xs"></i> 編集
+                    </button>
+                    ${item.cost > 0 ? `
+                        <button onclick="recordScheduleToExpense('${item.id}', '${dateId}'); closeScheduleDetailModal();" class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow">
+                            支出に計上
+                        </button>
+                    ` : ''}
+                    <button onclick="closeScheduleDetailModal()" class="${item.cost > 0 ? 'flex-1' : 'flex-1'} py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition">
+                        閉じる
+                    </button>
                 `;
             }
-
-            footerEl.innerHTML = `
-                <button onclick="closeScheduleDetailModal()" class="flex-1 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition">
-                    閉じる
-                </button>
-                ${item.cost > 0 ? `
-                    <button onclick="recordScheduleToExpense('${item.id}', '${dateId}'); closeScheduleDetailModal();" class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow">
-                        支出に計上
-                    </button>
-                ` : ''}
-            `;
 
             const modal = document.getElementById('scheduleDetailModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+        };
+
+        window.saveEditedSchedule = function(id, dateId) {
+            const list = window.appState.schedules[dateId];
+            if (!list) return;
+            const item = list.find(s => s.id === id);
+            if (!item) return;
+
+            const newTime = document.getElementById('editSchedTime').value;
+            if (newTime) item.time = newTime;
+
+            if (item.category === 'sightseeing') {
+                item.spot = document.getElementById('editSpot').value.trim() || item.spot;
+                item.action = document.getElementById('editAction').value.trim();
+                item.memo = document.getElementById('editMemo').value.trim();
+                item.mapUrl = document.getElementById('editMapUrl').value.trim();
+                item.cost = parseFloat(document.getElementById('editCost').value) || 0;
+            } else if (item.category === 'dining') {
+                item.name = document.getElementById('editDineName').value.trim() || item.name;
+                item.dineType = document.getElementById('editDineType').value;
+                item.memo = document.getElementById('editDineMemo').value.trim();
+                item.url = document.getElementById('editDineUrl').value.trim();
+                item.cost = parseFloat(document.getElementById('editCost').value) || 0;
+            } else if (item.category === 'transport') {
+                item.from = document.getElementById('editTransFrom').value.trim() || item.from;
+                item.to = document.getElementById('editTransTo').value.trim() || item.to;
+                item.duration = document.getElementById('editTransDuration').value.trim();
+                item.cost = parseFloat(document.getElementById('editCost').value) || 0;
+            } else {
+                item.title = document.getElementById('editOtherTitle').value.trim() || item.title;
+                item.memo = document.getElementById('editOtherMemo').value.trim();
+                item.cost = parseFloat(document.getElementById('editCost').value) || 0;
+            }
+
+            window.saveState();
+            window.renderAll();
+            window._isScheduleEditing = false;
+            window.renderScheduleModalContent();
+            window.showToast('スケジュールを更新しました');
         };
 
         window.closeScheduleDetailModal = function() {
