@@ -124,7 +124,7 @@
             </div>
 
             <!-- Content Details / Edit Form -->
-            <div class="space-y-3 text-xs text-ukcinder" id="modalDetailBody">
+            <div class="space-y-3 text-xs text-ukcinder max-h-[60vh] overflow-y-auto pr-1" id="modalDetailBody">
                 <!-- Injected via JavaScript -->
             </div>
 
@@ -1268,14 +1268,18 @@
             let dotColor = 'bg-uknavy';
             let titleHtml = '';
             let detailsHtml = '';
+            
+            const customTextColor = item.textColor || '';
+            const textStyle = customTextColor ? `color: ${customTextColor};` : '';
+            const textColorClass = customTextColor ? '' : 'text-ukcinder';
 
             if (item.category === 'sightseeing') {
                 dotColor = 'bg-uknavy';
                 badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-uknavy border border-red-200">🏛 Sightseeing</span>`;
-                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm leading-snug">${window.escapeHtml(item.spot)}</h4>`;
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.spot)}</h4>`;
                 detailsHtml = `
-                    ${item.action ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap">${window.escapeHtml(item.action)}</p>` : ''}
-                    ${item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap">${window.escapeHtml(item.memo)}</p>` : ''}
+                    ${item.action ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.action)}</p>` : ''}
+                    ${item.memo ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : ''}
                 `;
             } else if (item.category === 'dining') {
                 dotColor = 'bg-ukgold';
@@ -1283,8 +1287,8 @@
                 const diningMainBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-ukgold border border-amber-200">🍽️ Dining</span>`;
                 const diningSubBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded ${window.getDiningBadgeColor(dType)} shadow-sm">${window.escapeHtml(dType)}</span>`;
                 badgeHtml = diningMainBadge + ' ' + diningSubBadge;
-                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm leading-snug">${window.escapeHtml(item.name)}</h4>`;
-                detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap">${window.escapeHtml(item.memo)}</p>` : '';
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.name)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
             } else if (item.category === 'transport') {
                 dotColor = 'bg-slate-700';
                 const modeEmojis = {
@@ -1304,18 +1308,18 @@
                 }
                 badgeHtml = modeBadge;
                 titleHtml = `
-                    <h4 class="font-bold text-ukcinder text-xs sm:text-sm flex items-center gap-1.5 flex-wrap leading-snug">
+                    <h4 class="font-bold ${textColorClass} text-xs sm:text-sm flex items-center gap-1.5 flex-wrap leading-snug" style="${textStyle}">
                         <span>${window.escapeHtml(item.from)}</span>
-                        <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
+                        <i class="fa-solid fa-arrow-right text-[10px] opacity-70"></i>
                         <span>${window.escapeHtml(item.to)}</span>
                     </h4>
                 `;
-                detailsHtml = item.duration ? `<p class="text-[11px] text-slate-500 mt-2"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
+                detailsHtml = item.duration ? `<p class="text-[11px] ${textColorClass} mt-2" style="${textStyle}"><i class="fa-regular fa-hourglass-half mr-1"></i>${window.escapeHtml(item.duration)}</p>` : '';
             } else {
                 dotColor = 'bg-uksidewalk';
                 badgeHtml = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-ukcinder border border-slate-200">💡 Others</span>`;
-                titleHtml = `<h4 class="font-bold text-ukcinder text-xs sm:text-sm leading-snug">${window.escapeHtml(item.title)}</h4>`;
-                detailsHtml = item.memo ? `<p class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap">${window.escapeHtml(item.memo)}</p>` : '';
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-xs sm:text-sm leading-snug" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
+                detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-1 bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
             }
 
             const dayTagHtml = dayPrefixLabel
@@ -1335,6 +1339,12 @@
                 }
             }
 
+            const customBg = item.bgColor || '#ffffff';
+            const customDot = item.dotColor || dotColor;
+            const dotStyle = customDot.startsWith('#') ? `background-color: ${customDot};` : '';
+            const dotClass = customDot.startsWith('#') ? '' : customDot;
+            const cardBgStyle = customBg !== '#ffffff' ? `background-color: ${customBg};` : '';
+
             return `
                 <div class="relative pl-[70px] sm:pl-[76px] group animate-fade-in py-2">
                     <!-- Left Time Column -->
@@ -1343,11 +1353,11 @@
                         <div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">${window.escapeHtml(endTimeStr)}</div>
                     </div>
 
-                    <!-- Timeline node dot precisely centered on the vertical line -->
-                    <div class="absolute left-[51px] sm:left-[57px] top-4 w-3 h-3 rounded-full ${dotColor} border-2 border-white shadow z-10"></div>
+                    <!-- Timeline node dot -->
+                    <div class="absolute left-[51px] sm:left-[57px] top-4 w-3 h-3 rounded-full ${dotClass} border-2 border-white shadow z-10" style="${dotStyle}"></div>
 
-                    <!-- Right Schedule Box with natural height expansion -->
-                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" class="bg-white hover:bg-amber-50/40 active:bg-amber-50/80 cursor-pointer transition rounded-xl p-3 border border-uksidewalk/60 shadow-sm relative ml-2">
+                    <!-- Right Schedule Box -->
+                    <div onclick="openScheduleDetailModal('${item.id}', '${dateId}')" style="${cardBgStyle}" class="bg-white hover:brightness-95 active:brightness-90 cursor-pointer transition rounded-xl p-3 border border-uksidewalk/60 shadow-sm relative ml-2">
                         <div class="flex flex-wrap justify-between items-start gap-1 mb-1">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 ${dayTagHtml}
@@ -1361,7 +1371,7 @@
                         </div>
                         ${titleHtml}
                         ${detailsHtml}
-                        <div class="text-[9px] text-slate-300 font-semibold text-right mt-1.5">タップで詳細を表示 ➔</div>
+                        <div class="text-[9px] opacity-60 font-semibold text-right mt-1.5" style="${textStyle}">タップで詳細・カラー変更 ➔</div>
                     </div>
                 </div>
             `;
@@ -1521,6 +1531,24 @@
                     `;
                 }
 
+                // Color Customization Fields in Edit Mode (Card Bg, Dot Color, and Text Color)
+                editFieldsHtml += `
+                    <div class="border-t border-ukcinder/15 pt-3 mt-3 grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1 text-[11px]">カード背景色</label>
+                            <input type="color" id="editCardBg" value="${item.bgColor || '#ffffff'}" class="w-full h-10 rounded-xl border border-ukcinder/20 cursor-pointer bg-white px-1 py-1">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1 text-[11px]">ドットの色</label>
+                            <input type="color" id="editDotColor" value="${item.dotColor && item.dotColor.startsWith('#') ? item.dotColor : '#154673'}" class="w-full h-10 rounded-xl border border-ukcinder/20 cursor-pointer bg-white px-1 py-1">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-ukcinder mb-1 text-[11px]">文字の色</label>
+                            <input type="color" id="editTextColorPicker" value="${item.textColor || '#323030'}" class="w-full h-10 rounded-xl border border-ukcinder/20 cursor-pointer bg-white px-1 py-1">
+                        </div>
+                    </div>
+                `;
+
                 bodyEl.innerHTML = editFieldsHtml;
                 footerEl.innerHTML = `
                     <button onclick="toggleScheduleEditMode()" class="flex-1 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-ukcinder/15 text-ukcinder font-semibold transition">
@@ -1638,6 +1666,13 @@
                 item.memo = document.getElementById('editOtherMemo').value.trim();
                 item.cost = parseFloat(document.getElementById('editCost').value) || 0;
             }
+
+            const bgInput = document.getElementById('editCardBg');
+            const dotInput = document.getElementById('editDotColor');
+            const textColorInput = document.getElementById('editTextColorPicker');
+            if (bgInput) item.bgColor = bgInput.value;
+            if (dotInput) item.dotColor = dotInput.value;
+            if (textColorInput) item.textColor = textColorInput.value;
 
             window.saveState();
             window.renderAll();
