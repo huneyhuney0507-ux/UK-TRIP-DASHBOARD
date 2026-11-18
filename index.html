@@ -1509,9 +1509,8 @@
             const textColorClass = customTextColor ? '' : 'text-ukcinder';
             const iconColorStyle = customTextColor ? `color: ${customTextColor}; opacity: 0.85;` : '';
 
-            const dayTagHtml = dayPrefixLabel
-                ? `<span class="font-bold text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">${window.escapeHtml(dayPrefixLabel)}</span>`
-                : '';
+            // タイムラインカードのヘッダーには日付タグを表示せず、バッジやリンクのみにするため dayTagHtml を削除
+            const dayTagHtml = '';
 
             // Check if item has a valid link (mapUrl for sightseeing, url for dining)
             const itemLink = item.mapUrl || item.url || '';
@@ -1580,7 +1579,7 @@
             } else {
                 dotColor = 'bg-uksidewalk';
                 badgeHtml = dayTagHtml ? `<div class="flex items-center gap-1.5 flex-wrap mb-1.5">${dayTagHtml}</div>` : '';
-                titleHtml = `<h4 class="font-bold ${textColorClass} text-[13.2px] sm:text-[15.2px] leading-snug pt-5" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
+                titleHtml = `<h4 class="font-bold ${textColorClass} text-[13.2px] sm:text-[15.2px] leading-snug pt-2" style="${textStyle}">${window.escapeHtml(item.title)}</h4>`;
                 detailsHtml = item.memo ? `<p class="text-[11px] ${textColorClass} mt-2 bg-slate-50/20 p-1.5 rounded-lg border border-slate-100/40 whitespace-pre-wrap" style="${textStyle}">${window.escapeHtml(item.memo)}</p>` : '';
             }
 
